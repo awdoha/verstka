@@ -1,7 +1,23 @@
+/* ============================================================================
+   ========== СТИЛИ ДЛЯ УРОВНЯ 1 ==========
+   ============================================================================
+   Этот файл содержит стили специфичные для первого уровня:
+   - Контейнер уровня
+   - Зоны категорий (drop-zone)
+   - Круги со словами (dragger)
+   - Анимации
+   ============================================================================ */
+
+/* ============================================================================
+   ========== 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ УРОВНЯ ==========
+   ============================================================================ */
 :root {
-    --level-padding: clamp(12px, 2vw, 22px);
+    --level-padding: clamp(12px, 2vw, 22px);  /* Адаптивные отступы */
 }
 
+/* ============================================================================
+   ========== 2. БАЗОВЫЕ СТИЛИ ==========
+   ============================================================================ */
 html, body {
     width: 100%;
     height: 100%;
@@ -9,10 +25,13 @@ html, body {
 
 body {
     margin: 0;
-    overflow: hidden;
-    font-size: clamp(14px, 1.6vw, 17px);
+    overflow: hidden;  /* Убираем прокрутку страницы */
+    font-size: clamp(14px, 1.6vw, 17px);  /* Адаптивный размер шрифта */
 }
 
+/* ============================================================================
+   ========== 3. КОНТЕЙНЕР УРОВНЯ ==========
+   ============================================================================ */
 .level-container {
     width: 100%;
     max-width: 100vw;
@@ -25,6 +44,9 @@ body {
     overflow: hidden;
 }
 
+/* ============================================================================
+   ========== 4. КАРТОЧКА УРОВНЯ ==========
+   ============================================================================ */
 .level1-card {
     display: flex;
     flex-direction: column;
@@ -37,8 +59,11 @@ body {
     margin: 0 auto;
 }
 
+/* ============================================================================
+   ========== 5. ИГРОВАЯ ОБЛАСТЬ ==========
+   ============================================================================ */
 .game-area {
-    flex: 1;
+    flex: 1;                      /* Занимает всё доступное пространство */
     min-height: 0;
     max-height: 90%;
     display: flex;
@@ -50,45 +75,66 @@ body {
     padding: 12px;
     overflow: hidden;
 }
+
+/* ============================================================================
+   ========== 6. ЗАГОЛОВОК ==========
+   ============================================================================ */
 .card h2 {
     margin: 0;
     font-size: clamp(1rem, 2.3vw, 1.35rem);
     line-height: 1.3;
 }
+
 .card h2 small {
     font-size: clamp(0.35rem, 1.6vw, 1rem);
 }
+
+/* ============================================================================
+   ========== 7. ЗОНЫ КАТЕГОРИЙ (КВАДРАТЫ) ==========
+   ============================================================================ */
 .drop-zone {
+    /* Размеры через CSS-переменные (устанавливаются в JS) */
     width: clamp(0.9rem, var(--zone-width, 130px), 10rem);
     height: clamp(0.9rem, var(--zone-height, 80px), 10rem);
+    
     border: 2px solid white;
     background: rgba(255,255,255,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute; 
+    position: absolute;  /* Абсолютное позиционирование внутри game-area */
     border-radius: 10px;
     font-weight: bold;
+    
+    /* Адаптивный размер текста */
     font-size: clamp(calc(var(--zone-width, 80px)/20), calc(var(--zone-width, 80px)/5), 100%);
     
     padding: clamp(5px, 1vw, 10px) clamp(5px, 1vw, 10px);
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Текст внутри зоны категории */
 .drop-zone .zone-label {
     display: block;
     width: 100%;
     text-align: center;
-    word-break: break-word;
+    word-break: break-word;      /* Перенос длинных слов */
     white-space: normal;
     line-height: 1.2;
 }
+
+/* ============================================================================
+   ========== 8. СЛОВА (КРУГИ) ==========
+   ============================================================================ */
 .dragger {
+    /* Размер через CSS-переменную */
     width: var(--drag-size, 80px);
     height: var(--drag-size, 80px);
-    background: var(--primary);
+    
+    background: var(--primary);   /* Основной цвет из глобальных стилей */
     color: white;
-    border-radius: 50%;
+    border-radius: 50%;           /* Круглая форма */
     position: absolute;
     display: flex;
     align-items: center;
@@ -96,36 +142,177 @@ body {
     cursor: grab;
     z-index: 100;
     box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    
+    /* Адаптивный размер текста */
     font-size: clamp(2px, calc(var(--drag-size, 80px) * 0.24), 18px);
+    
     box-sizing: border-box;
     text-align: center;
     word-break: break-word;
     line-height: 1.15;
 }
-.dragger:active { cursor: grabbing; transform: scale(1.1); }
 
+.dragger:active {
+    cursor: grabbing;
+    transform: scale(1.1);        /* Увеличение при захвате */
+}
+
+/* ============================================================================
+   ========== 9. ОБЛАСТИ ДЛЯ КАТЕГОРИЙ И СЛОВ ==========
+   ============================================================================ */
 .zone-area,
 .words-area {
     width: calc(100% - 10px);
-    position: relative;
+    position: relative;           /* Для абсолютного позиционирования внутри */
     display: block;
     border-radius: 10px;
     margin: 5px 5px 5px 5px;
     max-width: 100%;
 }
 
+/* Область для категорий (верхняя половина) */
 .zone-area {
-    flex: 1 1 55%;
+    flex: 1 1 55%;                /* Занимает 55% высоты */
     min-height: clamp(60px, 340px);
-    border: 2px dashed #74b9ff;
+    border: 2px dashed #74b9ff;   /* Синяя пунктирная рамка */
     background: rgba(0, 121, 255, 0.05);
     position: relative;
 }
 
+/* Область для слов (нижняя половина) */
 .words-area {
-    flex: 1 1 45%;
+    flex: 1 1 45%;                /* Занимает 45% высоты */
     min-height: clamp(60px, 260px);
-    border: 2px dashed #55efc4;
+    border: 2px dashed #55efc4;   /* Зеленая пунктирная рамка */
     background: rgba(0, 255, 150, 0.05);
     position: relative;
+}
+
+/* ============================================================================
+   ========== 10. ДИНАМИЧЕСКИЕ КЛАССЫ ==========
+   ============================================================================ */
+
+/* Элемент в процессе перетаскивания */
+.dragger.dragging {
+    transform: scale(1.15) rotate(5deg);  /* Увеличение и поворот */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    cursor: grabbing !important;
+    z-index: 1000;                         /* Поверх всего */
+}
+
+/* Заблокированный элемент (после использования) */
+.dragger.locked {
+    opacity: 0;
+    cursor: not-allowed !important;
+}
+
+/* Заполненная зона категории */
+.drop-zone.filled {
+    border-color: #00b894;                  /* Зеленая рамка */
+    box-shadow: 0 0 20px rgba(0, 184, 148, 0.5);  /* Зеленое свечение */
+}
+
+/* Текст внутри зоны категории (жирный) */
+.zone-label {
+    font-weight: bold;
+}
+
+/* Текст внутри слова */
+.drag-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: clamp(4px, calc(var(--drag-size, 80px) * 75%), 28px);
+    font-weight: bold;
+    text-align: center;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    line-height: 1.15;
+    padding: 0 6px;
+    width: 100%;
+}
+
+/* ============================================================================
+   ========== 11. АНИМАЦИИ ==========
+   ============================================================================ */
+
+/* Пульсация (для таймера) */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Тряска (для ошибок) */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Всплывающий текст штрафа */
+.floating-text {
+    position: fixed;
+    color: var(--error);
+    font-weight: bold;
+    font-size: 2em;
+    pointer-events: none;
+    z-index: 9999;
+    animation: floatUp 1s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(1.3);
+    }
+}
+
+/* ============================================================================
+   ========== 12. АДАПТИВНОСТЬ ==========
+   ============================================================================ */
+
+/* Для планшетов и мобильных */
+@media (max-width: 768px) {
+    .level-container {
+        padding: 10px;
+    }
+    
+    .game-area {
+        padding: 8px;
+    }
+    
+    .drop-zone {
+        /* На маленьких экранах зоны становятся меньше */
+        width: clamp(0.9rem, var(--zone-width, 100px), 8rem);
+        height: clamp(0.9rem, var(--zone-height, 60px), 8rem);
+    }
+    
+    .dragger {
+        width: min(60px, var(--drag-size, 60px));
+        height: min(60px, var(--drag-size, 60px));
+        font-size: clamp(8px, 3vw, 14px);
+    }
+    
+    .zone-area, .words-area {
+        min-height: 150px;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .drop-zone {
+        font-size: 10px;
+    }
+    
+    .dragger {
+        width: 50px;
+        height: 50px;
+        font-size: 9px;
+    }
 }
