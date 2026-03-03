@@ -4,82 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Уровень 1 - выбор сложности</title>
+    
+    <!-- Подключаем общие стили -->
     <link rel="stylesheet" href="../../style.css">
+    <!-- Подключаем стили для выбора режима -->
     <link rel="stylesheet" href="../select-mode.css">
 </head>
 <body>
-<div id="large-header" class="large-header">
-    <canvas id="demo-canvas"></canvas>
-</div>
+    <!-- Анимированный фон -->
+    <div id="large-header" class="large-header">
+        <canvas id="demo-canvas"></canvas>
+    </div>
 
-<div class="container select-mode-container">
-    <div class="card mode-card mode-theme-l1">
-        <div class="mode-header">
-            <h2>Уровень 1 - выберите сложность 🎯</h2>
-        </div>
-      <button class="btn" onclick="window.location.href='../../index.html'">← В меню 🏠</button>
-
-        <div class="mode-layout">
-            <div class="mode-options">
-                <p style="opacity:0.7;">Каждый режим меняет время, лимиты ошибок и начисление очков ✨.</p>
-                <div class="mode-grid">
-                    <button class="btn mode-btn" data-mode="normal">
-                        <strong>Нормальный 😊</strong>
-                        <span>90 сек, 5 промахов, 4 пары</span>
-                    </button>
-                    <button class="btn mode-btn" data-mode="hard">
-                        <strong>Сложный 💥</strong>
-                        <span>70 сек, 3 промаха, 5 пар</span>
-                    </button>
-                    <button class="btn mode-btn" data-mode="endless">
-                        <strong>Бесконечный ♾️</strong>
-                        <span>Без таймера, 3 промаха - игра окончена</span>
-                    </button>
-                </div>
+    <!-- Основной контейнер -->
+    <div class="container select-mode-container">
+        <!-- Карточка выбора режима с темой уровня 1 -->
+        <div class="card mode-card mode-theme-l1">
+            
+            <!-- Заголовок и кнопка "В меню" -->
+            <div class="mode-header">
+                <h2>Уровень 1 - выберите сложность 🎯</h2>
             </div>
+            
+            <!-- Кнопка возврата в главное меню -->
+            <button class="btn" onclick="window.location.href='../../index.html'">← В меню 🏠</button>
 
-            <div class="mode-info card compact-card" style="background: rgba(20,20,20,0.85);">
-                <h3 style="margin-bottom: 15px;">📖 Описание режимов</h3>
-                <div class="instruction-item">
-                    <p><strong>Нормальный:</strong> классический темп и правила, лучший режим для знакомства 😌.</p>
+            <!-- Две колонки: кнопки и описание -->
+            <div class="mode-layout">
+                
+                <!-- ===== ЛЕВАЯ КОЛОНКА: КНОПКИ РЕЖИМОВ ===== -->
+                <div class="mode-options">
+                    <p style="opacity:0.7;">Каждый режим меняет время, лимиты ошибок и начисление очков ✨.</p>
+                    
+                    <!-- Вертикальная сетка кнопок -->
+                    <div class="mode-grid">
+                        
+                        <!-- Кнопка "Нормальный" -->
+                        <button class="btn mode-btn" data-mode="normal">
+                            <strong>Нормальный 😊</strong>
+                            <span>90 сек, 5 промахов, 4 пары</span>
+                        </button>
+                        
+                        <!-- Кнопка "Сложный" -->
+                        <button class="btn mode-btn" data-mode="hard">
+                            <strong>Сложный 💥</strong>
+                            <span>70 сек, 3 промаха, 5 пар</span>
+                        </button>
+                        
+                        <!-- Кнопка "Бесконечный" -->
+                        <button class="btn mode-btn" data-mode="endless">
+                            <strong>Бесконечный ♾️</strong>
+                            <span>Без таймера, 3 промаха - игра окончена</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="instruction-item">
-                    <p><strong>Сложный:</strong> меньше времени, больше пар и штрафов. Ошибаться нельзя! ⚠️</p>
-                </div>
-                <div class="instruction-item">
-                    <p><strong>Бесконечный:</strong> таймер отсутствует, но три ошибки завершают забег. Все очки сохраняются 💾.</p>
+
+                <!-- ===== ПРАВАЯ КОЛОНКА: ОПИСАНИЕ РЕЖИМОВ ===== -->
+                <div class="mode-info card compact-card" style="background: rgba(20,20,20,0.85);">
+                    <h3 style="margin-bottom: 15px;">📖 Описание режимов</h3>
+                    
+                    <!-- Описание нормального режима -->
+                    <div class="instruction-item">
+                        <p><strong>Нормальный:</strong> классический темп и правила, лучший режим для знакомства 😌.</p>
+                    </div>
+                    
+                    <!-- Описание сложного режима -->
+                    <div class="instruction-item">
+                        <p><strong>Сложный:</strong> меньше времени, больше пар и штрафов. Ошибаться нельзя! ⚠️</p>
+                    </div>
+                    
+                    <!-- Описание бесконечного режима -->
+                    <div class="instruction-item">
+                        <p><strong>Бесконечный:</strong> таймер отсутствует, но три ошибки завершают забег. Все очки сохраняются 💾.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="../../script.js"></script>
-<script>
-    (function() {
-        AnimatedBackground.init();
-        const LEVEL_ID = 1;
-        const currentMode = LevelModeManager.get(LEVEL_ID, 'normal');
-        const buttons = document.querySelectorAll('.mode-btn');
+    <!-- Подключаем общие скрипты -->
+    <script src="../../script.js"></script>
+    
+    <!-- Скрипт для обработки выбора режима -->
+    <script>
+        (function() {
+            // Запускаем анимированный фон
+            AnimatedBackground.init();
+            
+            // ID текущего уровня (для LevelModeManager)
+            const LEVEL_ID = 1;
+            
+            // Получаем сохраненный режим (или 'normal' по умолчанию)
+            const currentMode = LevelModeManager.get(LEVEL_ID, 'normal');
+            
+            // Находим все кнопки режимов
+            const buttons = document.querySelectorAll('.mode-btn');
 
-        buttons.forEach(btn => {
-            const mode = btn.dataset.mode;
-            if (mode === currentMode) {
-                btn.classList.add('active');
-            }
-            btn.addEventListener('click', () => {
-                LevelModeManager.save(LEVEL_ID, mode);
-                SoundManager.click();
-                window.location.href = './index.html';
+            // Для каждой кнопки
+            buttons.forEach(btn => {
+                const mode = btn.dataset.mode;
+                
+                // Если это сохраненный режим - подсвечиваем кнопку
+                if (mode === currentMode) {
+                    btn.classList.add('active');
+                }
+                
+                // Добавляем обработчик клика
+                btn.addEventListener('click', () => {
+                    // Сохраняем выбранный режим в sessionStorage
+                    LevelModeManager.save(LEVEL_ID, mode);
+                    
+                    // Звук клика
+                    SoundManager.click();
+                    
+                    // Переходим на страницу уровня
+                    window.location.href = './index.html';
+                });
             });
-        });
-    })();
-</script>
-<script>
-    (function() {
-        AnimatedBackground.init();
-    })();
-</script>
+        })();
+    </script>
+    
+    <!-- Дополнительный вызов AnimatedBackground (на всякий случай) -->
+    <script>
+        (function() {
+            AnimatedBackground.init();
+        })();
+    </script>
 </body>
 </html>
-
