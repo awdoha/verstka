@@ -1,0 +1,88 @@
+.select-mode-container {
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+}
+
+.mode-card {
+    --accent-color: #00cec9;
+    --accent-shadow: rgba(0, 206, 201, 0.3);
+    padding: 30px;
+    width: 100%;
+}
+
+.mode-card.mode-theme-l2 {
+    --accent-color: #0984e3;
+    --accent-shadow: rgba(9, 132, 227, 0.3);
+}
+
+.mode-card.mode-theme-l3 {
+    --accent-color: #a29bfe;
+    --accent-shadow: rgba(162, 155, 254, 0.3);
+}
+
+.mode-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.mode-options {
+    flex: 1 1 320px;
+}
+
+.mode-info {
+    flex: 0 1 320px;
+}
+
+.mode-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    text-align: left;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s, border 0.2s, box-shadow 0.2s;
+}
+
+.mode-btn:hover {
+    transform: translateY(-2px);
+}
+
+.mode-btn.active {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-shadow);
+}
+
+.mode-btn span {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+.mode-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+h2 {
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .mode-layout {
+        flex-direction: column;
+    }
+}
+

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лидерборд - Смысл Слова</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="large-header" class="large-header">
+  <canvas id="demo-canvas"></canvas>
+</div>
+
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-btn active" data-theme="dark" title="Тёмная тема">🌙</button>
+  <button class="theme-btn" data-theme="light" title="Светлая тема">☀️</button>
+  <button class="theme-btn" data-theme="purple" title="Фиолетовая тема">💜</button>
+  <button class="theme-btn" data-theme="blue" title="Синяя тема">🔷</button>
+</div>
+
+<div class="container">
+  <h1 class="main-title">
+    <span class="title-main">ТАБЛИЦА ЛИДЕРОВ</span>
+    <span class="title-sub">Лучшие игроки и их достижения</span>
+  </h1>
+
+  <div class="card" style="display: flex; flex-direction: column; height: calc(100vh - 200px);">
+    <div style="margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+      <button class="btn" onclick="window.location.href='index.html'">
+        ← Назад в меню
+      </button>
+      <button class="btn" style="background:var(--secondary)" onclick="exportLeaderboard()">
+        📤 Экспорт данных
+      </button>
+      <button class="btn" style="background:var(--primary)" onclick="document.getElementById('importFile').click()">
+        📥 Импорт данных
+      </button>
+      <button class="btn" style="background:var(--accent)" onclick="clearLeaderboard()">
+        🗑️ Очистить таблицу
+      </button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importLeaderboard(event)">
+    </div>
+
+    <div id="leaderboard-container" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
+      <div class="loading-text">Загрузка таблицы лидеров...</div>
+    </div>
+
+    <div class="leaderboard-stats" id="stats-info" style="margin-top: 1rem;">
+    </div>
+  </div>
+
+  <footer>
+    <p>Сделано с удовольствием ✨ 
+  </footer>
+</div>
+
+<script src="script.js"></script>
+<script>
+    let currentTheme = localStorage.getItem('gameTheme') || 'dark';
+    
+    function initTheme() {
+        document.body.className = `theme-${currentTheme}`;
+        
+        const buttons = document.querySelectorAll('.theme-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.theme === currentTheme) {
+                btn.classList.add('active');
+            }
+        });
+        
+        const switcher = document.getElementById('theme-switcher');
+        if (switcher) {
+            switcher.addEventListener('click', (e) => {
+                if (e.target.classList.contains('theme-btn')) {
+                    const theme = e.target.dataset.theme;
+                    setTheme(theme);
+                }
+            });
+        }
+    }
+    
+    function setTheme(themeName) {
+        document.body.className = `theme-${themeName}`;
+        currentTheme = themeName;
+        localStorage.setItem('gameTheme', themeName);
+        
+        const buttons = document.querySelectorAll('.theme-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.theme === themeName) {
+                btn.classList.add('active');
+            }
+        });
+        
+        SoundManager.click();
+    }
+
+    
+    function loadLeaderboardData() {
+        const container = document.getElementById('leaderboard-container');
+        let players = LeaderboardManager.getAllPlayers();
+        const totalPlayersCount = document.getElementById('total-players-count');
+
+        if (totalPlayersCount) {
+            totalPlayersCount.textContent = players.length;
+        }
+
+        if (players.length === 0) {
+            container.innerHTML = `
+            <div class="empty-leaderboard">
+                <h3>Таблица лидеров пуста</h3>
+                <p>Пока никто не играл в игру. Будьте первым!</p>
+                <button class="btn" onclick="window.location.href='index.html'" style="background:var(--secondary)">
+                    🎮 Начать играть
+                </button>
+            </div>
+        `;
+            updateStats(players);
+            return;
+        }
+
+        let html = `
+        <div class="leaderboard-full-container">
+            <div class="leaderboard-header">
+                <div>🏆 Место</div>
+                <div>👤 Игрок</div>
+                <div style="text-align: right;">✨ Очки</div>
+                <div style="text-align: center;">🎯 Уровни</div>
+                <div style="text-align: right;">⏱️ Лучшее время</div>
+            </div>
+            <div class="leaderboard-body">
+        `;
+
+        players.forEach((player, index) => {
+            const isCurrentUser = UserManager.user && player.name === UserManager.user.name;
+            const medalClass = index === 0 ? 'medal-gold' : index === 1 ? 'medal-silver' : index === 2 ? 'medal-bronze' : '';
+            const medalIcon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+
+            const bestTime = player.bestTimes ? Math.min(...Object.values(player.bestTimes).filter(t => t > 0)) : 0;
+            const bestTimeStr = bestTime && isFinite(bestTime) ? formatTime(bestTime) : '--:--';
+
+            html += `
+            <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
+                <div class="leaderboard-rank ${medalClass}">${medalIcon}</div>
+                <div class="leaderboard-name">${player.name}</div>
+                <div class="leaderboard-score">${player.score}</div>
+                <div class="leaderboard-levels">${player.completedLevels.length}/3</div>
+                <div class="leaderboard-time">${bestTimeStr}</div>
+            </div>
+        `;
+        });
+
+        html += `
+            </div>
+        </div>
+        `;
+
+        container.innerHTML = html;
+        updateStats(players);
+    }
+
+    function formatTime(seconds) {
+        if (!seconds || seconds <= 0) return '--:--';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateStats(players) {
+        const statsContainer = document.getElementById('stats-info');
+        const totalPlayers = players.length;
+        const avgScore = totalPlayers > 0 ? Math.round(players.reduce((sum, p) => sum + p.score, 0) / totalPlayers) : 0;
+        const completedAll = players.filter(p => p.completedLevels.length >= 3).length;
+        const totalScore = players.reduce((sum, p) => sum + p.score, 0);
+        const bestPlayer = players.length > 0 ? players[0] : null;
+
+        statsContainer.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">${totalPlayers}</div>
+                <div class="stat-label">Всего игроков</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">${avgScore}</div>
+                <div class="stat-label">Средний счёт</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">${completedAll}</div>
+                <div class="stat-label">Прошли все</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">${bestPlayer ? bestPlayer.score : 0}</div>
+                <div class="stat-label">Рекорд ${bestPlayer ? bestPlayer.name : ''}</div>
+            </div>
+        </div>
+    `;
+    }
+
+    function exportLeaderboard() {
+        try {
+            const data = LeaderboardManager.exportToJSON();
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `лидеры_смысл_слова_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            NotificationManager.show('✅ Таблица экспортирована успешно!', 'success', 3000);
+        } catch (e) {
+            NotificationManager.show('❌ Ошибка при экспорте: ' + e.message, 'error', 4000);
+        }
+    }
+
+    function importLeaderboard(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const success = LeaderboardManager.importFromJSON(e.target.result);
+                if (success) {
+                    loadLeaderboardData();
+                    NotificationManager.show('✅ Данные успешно импортированы!', 'success', 3000);
+                } else {
+                    NotificationManager.show('❌ Ошибка при импорте данных', 'error', 4000);
+                }
+            } catch (err) {
+                NotificationManager.show('❌ Ошибка чтения файла: ' + err.message, 'error', 4000);
+            }
+            event.target.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    function clearLeaderboard() {
+        if (confirm("Вы уверены, что хотите полностью очистить таблицу лидеров? Это действие нельзя отменить.")) {
+            LeaderboardManager.clearAll();
+            NotificationManager.show('🗑️ Таблица лидеров очищена', 'warning', 3000);
+            setTimeout(() => {
+                loadLeaderboardData();
+            }, 500);
+        }
+    }
+
+    window.onload = () => {
+        AnimatedBackground.init();
+        initTheme();
+        loadLeaderboardData();
+    };
+</script>
+</body>
+</html>

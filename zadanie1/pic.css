@@ -1,0 +1,116 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #e0f7fa;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.aquarium {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 2px solid #000;
+  background: white;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+.grass1, .grass2, .grass3 {
+  position: absolute;
+  width: 50%;
+  height: 75%;
+}
+.grass1 { left: 25%; top: 0; transform: scaleX(-1); }
+.grass2 { left: 60%; top: 0; transform: scaleX(-1); }
+.grass3 { left: 25%; bottom: 10%; }
+.green {
+  position: absolute;
+  width: 120%;
+  height: 200%;
+  border: 8px solid lime;
+  border-radius: 100% 100% 0 0;
+  clip-path: polygon(25% 0, 100% 0, 100% 100%, 80% 20%);
+}
+.white {
+  position: absolute;
+  top: 3%;
+  left: 29%;
+  width: 60%;
+  height: 30%;
+  background: #fff;
+  border-radius: 100%;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 25%, 0% 25%);
+}
+.fish1, .fish2 {
+  position: absolute;
+  width: 55%;
+  height: 25%;
+}
+.fish1 { top: 30%; left: -7%; transform: scaleX(-1) rotate(15deg); }
+.fish2 { top: 30%; right: -15%; transform: rotate(35deg); }
+.body {
+  position: absolute;
+  width: 80%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(to right, rgb(247, 248, 230), rgb(226, 187, 56));
+  background-position: 0 0;
+  background-size: 125% 100%;
+}
+.tail {
+  position: absolute;
+  left: 60%;
+  top: 0;
+  width: 40%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse 25% 100% at right center, #fff 50%, transparent 50%),
+    linear-gradient(to right, rgb(247, 248, 230), rgb(226, 187, 56));
+  background-position: 0 0, 100% 0;
+  background-size: auto, 250% 100%;
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+  background-clip: content-box;
+}
+.eye {
+  position: absolute;
+  left: 10%;
+  top: 30%;
+  width: 10%;
+  height: 20%;
+  background-color: black;
+  border-radius: 50%;
+}
+.circle-pattern {
+  position: absolute;
+  left: 50%;
+  height: 15%;
+  aspect-ratio: 1 / 1;
+  border: 3px solid #c80a0a;
+  border-radius: 0 100% 100% 0;
+  background: transparent;
+  clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+}
+.circle-big {
+  position: absolute;
+  top: 3%;
+  height: 85%;
+  left: 18%;
+  right: 50%;
+  aspect-ratio: 1 / 2;
+}
+.sand {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 20%;
+  background-color: rgb(255, 221, 0);
+  background-image: linear-gradient(to right, rgb(255, 140, 0) 50%, transparent 50%);
+  background-size: 20% 100%;
+}

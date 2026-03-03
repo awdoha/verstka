@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Задание 3 — Многоуровневый список</title>
+  <style>
+    .back-button {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 24px;
+      background: #2e7d32;
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s ease;
+    }
+    .back-button:hover {
+      background: #1b5e20;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f8e9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      padding: 15px;
+      background: #006064;
+      color: white;
+    }
+    main {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    .controls {
+      text-align: center;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 0 10px;
+      background: #388e3c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2e7d32;
+    }
+
+    
+    .class1 {
+      background-color: #ffebee; 
+    }
+    .class2 {
+      background-color: #e8f5e9; 
+    }
+
+    aside ol {
+      counter-reset: item;
+    }
+    aside li {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-button">← Вернуться на сайт</a>
+
+  <header>
+    Костин Даниил, группа з5130903/30301
+  </header>
+
+  <main>
+    <div class="controls">
+      <button id="createBtn">Создать</button>
+      <button id="recolorBtn">Перекрасить</button>
+    </div>
+
+    <aside>
+      <ol id="phraseList"></ol>
+    </aside>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

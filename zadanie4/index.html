@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Задание 4 - Собрать домик</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        
+        .puzzle-area {
+            position: relative;
+            width: 550px;
+            height: 350px;
+            border: 4px solid orange;
+            margin: 50px auto;
+            background: #FFFFFF;
+        }
+
+        .puzzle-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            margin: 20px auto 50px auto;
+            background: #EBD1BB;
+            padding: 30px 0;
+            border-radius: 15px;
+        }
+
+        .check-btn {
+            background: #4C2B08;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            min-width: 250px;
+            width: auto;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 43, 8, 0.4);
+        }
+
+        .shape {
+            position: absolute;
+            cursor: grab;
+        }
+
+        .shape:active {
+            cursor: grabbing;
+        }
+
+        .green1 { 
+            background: #21A443; 
+            width: 150px; 
+            height: 90px;
+            clip-path: polygon(75px 0, 150px 90px, 0 90px);
+            top: 220px; 
+            left: 100px; 
+            z-index: 30;
+            transform: rotate(270deg);
+        }
+
+        .green2 { 
+            background: #73EA6C; 
+            width: 120px; 
+            height: 70px;
+            clip-path: polygon(60px 0, 120px 70px, 0 70px);
+            top: 80px; 
+            left: 390px; 
+            z-index: 31;
+            transform: rotate(90deg);
+        }
+
+        .green3 { 
+            background: #D2FF8E; 
+            width: 90px; 
+            height: 60px;
+            clip-path: polygon(45px 0, 90px 60px, 0 60px);
+            top: 80px; 
+            left: 300px; 
+            z-index: 32;
+            transform: rotate(90deg); 
+        }
+
+        .trunk {
+            width: 30px; 
+            height: 70px;
+            background: #82271A;
+            top: 200px; 
+            left: 350px;
+            z-index: 20;
+            transform: rotate(90deg); 
+        }
+
+        .red-square {
+            width: 100px; 
+            height: 100px;
+            background: #FF0000;
+            top: 110px; 
+            left: 80px;
+            z-index: 10;
+            transform: rotate(45deg);
+        }
+
+        .blue-square {
+            width: 40px; 
+            height: 40px;
+            background: #43BBEA;
+            top: 50px; 
+            left: 480px;
+            border-radius: 6px;
+            z-index: 12;
+        }
+
+        .brown-triangle {
+            width: 110px; 
+            height: 70px;
+            background: #B28864;
+            clip-path: polygon(55px 0, 0 70px, 110px 70px);
+            top: 170px; 
+            left: 200px;
+            z-index: 11;
+            transform: rotate(225deg);
+        }
+
+        .success-popup,
+        .error-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            background: white;
+            z-index: 99999;
+            text-align: center;
+            display: none;
+            opacity: 0;
+        }
+
+        .success-popup {
+            padding: 40px 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 4px solid #4CAF50;
+        }
+
+        .error-popup {
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 4px solid #FF9800;
+            max-width: 450px;
+        }
+
+        .popup-show {
+            display: block !important;
+            animation: popupFadeIn 0.3s forwards;
+        }
+
+        .popup-hide {
+            animation: popupFadeOut 0.3s forwards;
+        }
+
+        @keyframes popupFadeIn {
+            0% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            70% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+            100% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes popupFadeOut {
+            0% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #D32F2F;
+        }
+
+        .instruction-box {
+            background: #f8f9fa;
+            border-left: 4px solid orange;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 550px;
+            border-radius: 8px;
+        }
+
+        .instruction-box h3 {
+            margin-top: 0;
+            color: #4C2B08;
+        }
+
+        .instruction-box ul {
+            margin-bottom: 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background: #4C2B08;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            background: #6b3e0b;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center; padding: 20px;">
+        <a href="../index.html" class="back-link">← Вернуться на главную</a>
+    </div>
+
+    <div class="instruction-box">
+        <h3>🎯 Задание: Собрать домик и дерево</h3>
+        <ul>
+            <li><strong>Дерево:</strong> зелёные треугольники (green1, green2, green3) должны быть сложены пирамидкой, ствол (trunk) под ними</li>
+            <li><strong>Домик:</strong> красный квадрат (red-square) - основа, синий квадрат (blue-square) - окно внутри, коричневый треугольник (brown-triangle) - крыша сверху</li>
+            <li><strong>Поворот:</strong> дважды кликните по элементу для поворота на 45°</li>
+            <li><strong>Перемещение:</strong> просто перетащите элемент мышкой</li>
+        </ul>
+    </div>
+
+    <div class="puzzle-area">
+        <div id="elements">
+            <div class="shape green1 draggable"></div>
+            <div class="shape green2 draggable"></div>
+            <div class="shape green3 draggable"></div>
+            <div class="shape trunk draggable"></div>
+            <div class="shape red-square draggable"></div>
+            <div class="shape blue-square draggable"></div>
+            <div class="shape brown-triangle draggable"></div>
+        </div>
+    </div>
+
+    <div class="puzzle-controls">
+        <button id="puzzle-check-btn" class="check-btn">
+            Проверить сборку
+        </button>
+    </div>
+
+    <div id="success-popup" class="popup success-popup" style="display: none;">
+        <div class="success-title">✓ Рисунок собран верно!</div>
+        <p style="margin-top: 10px;">Отличная работа! 🎉</p>
+    </div>
+
+    <div id="error-popup" class="popup error-popup" style="display: none;">
+        <div class="error-title">✗ Требуются исправления</div>
+        <p style="margin-top: 10px;">Проверьте расположение и углы поворота элементов</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

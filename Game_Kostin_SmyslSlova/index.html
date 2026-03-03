@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Игра: Смысл Слова</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="large-header" class="large-header">
+  <canvas id="demo-canvas"></canvas>
+</div>
+
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-btn active" data-theme="dark" title="Тёмная тема">🌙</button>
+  <button class="theme-btn" data-theme="light" title="Светлая тема">☀️</button>
+  <button class="theme-btn" data-theme="purple" title="Фиолетовая тема">💜</button>
+  <button class="theme-btn" data-theme="blue" title="Синяя тема">🔷</button>
+</div>
+
+
+<button id="logout-btn" class="logout-btn" onclick="logoutCurrentUser()" title="Сменить игрока">
+  🔄 Сменить игрока
+</button>
+
+<div class="container">
+  <h1 class="main-title">
+    <span class="title-main">СМЫСЛ СЛОВА</span>
+    <span class="title-sub">Игра со смыслом</span>
+  </h1>
+
+  <div id="auth-screen" class="card" style="max-width: 500px; margin: 0 auto;">
+    <h2 style="margin-bottom: 1rem;">🎮 Начните игру</h2>
+    <p style="margin-bottom: 1.5rem; opacity: 0.9;">Введите ваше имя для продолжения</p>
+    <input type="text" id="nameInput" placeholder="Ваше имя" maxlength="20" autocomplete="off">
+  
+    <button class="btn btn-large" onclick="startGame()" style="margin-top: 1rem;">
+      Начать игру 🚀
+    </button>
+    <small style="color: rgba(255,255,255,0.6); display: block; margin-top: 1.5rem; font-size: 0.85rem;">
+      ℹ Используйте мышку для перетаскивания слов в нужные категории
+    </small>
+  </div>
+
+  <div id="menu-screen" style="display:none; height: 100%;">
+
+    <div class="side-panels">
+
+      <div class="side-panel">
+        <div class="card compact-card">
+          <h3 style="margin-bottom: 12px; font-size: 1.1rem;">🎮 Как играть</h3>
+          <div class="how-to-play">
+            <div class="instruction-item">
+              <p>1 уровень: Перетаскивайте слова в подходящие категории 🧠</p>
+            </div>
+            <div class="instruction-item">
+              <p>2 уровень: Слова падают! Успейте распределить их ⚡</p>
+            </div>
+            <div class="instruction-item">
+              <p>3 уровень: Максимальная сложность и скорость 💥</p>
+            </div>
+            <div class="instruction-item">
+              <p>Внимание: время ограничено! ⏳</p>
+            </div>
+          </div>
+          <button class="btn btn-small" onclick="showAdvancedInstructions()" style="margin-top: 12px; width: 100%;">
+            📖 Подробные правила
+          </button>
+        </div>
+      </div>
+
+      <div class="main-panel">
+        <div class="card">
+          <div class="player-info">
+            <div class="player-stats">
+              <div class="stat-item">
+                <span class="stat-label">Игрок:</span>
+                <span id="welcome-text" class="stat-value"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Очки:</span>
+                <span id="score-text" class="stat-value">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Пройдено:</span>
+                <span id="completed-text" class="stat-value">0/3</span>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="margin: 1rem 0; text-align: center;">🎯 Выберите уровень</h3>
+
+          <div class="level-grid">
+            <div id="lvl1" class="level-card" onclick="goTo(1)">
+              <h3>Уровень 1 🌱</h3>
+              <p class="level-desc">Пары слов 🔗</p>
+              <div class="level-info">
+                <small>90 секунд</small>
+              </div>
+              <div class="level-stats" id="stats-1"></div>
+            </div>
+
+            <div id="lvl2" class="level-card" onclick="goTo(2)">
+              <h3>Уровень 2 ⚡</h3>
+              <p class="level-desc">Падающие слова 🌀</p>
+              <div class="level-info">
+                <small>120 секунд</small>
+              </div>
+              <div class="level-stats" id="stats-2"></div>
+            </div>
+
+            <div id="lvl3" class="level-card" onclick="goTo(3)">
+              <h3>Уровень 3 🔥</h3>
+              <p class="level-desc">Экстремальная скорость 🚀</p>
+              <div class="level-info">
+                <small>120 секунд</small>
+              </div>
+              <div class="level-stats" id="stats-3"></div>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <button class="btn" style="background:#e17055" onclick="resetProgress()">
+              Сбросить прогресс ♻️
+            </button>
+            <button class="btn" style="background:#d63031" onclick="logoutCurrentUser()">
+              Сменить игрока 🔄
+            </button>
+            <button class="btn" style="background:var(--secondary)" onclick="showThemeInfo()">
+              Сменить тему 🎨
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div class="card compact-card">
+          <h3 style="margin-bottom: 15px;">Топ игроков 🥇</h3>
+          <div id="mini-leaderboard">
+            <div class="loading-text">Загрузка...</div>
+          </div>
+          <button class="btn btn-small" onclick="window.location.href='leaderboard.html'" style="margin-top: 10px;">
+            Полная таблица 🏆
+          </button>
+          <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <small style="opacity: 0.7;">Всего игроков: <span id="total-players">0</span></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align: center; margin-top: 20px; opacity: 0.6; font-size: 0.9em;">
+    <p>Сделано с удовольствием ✨</p>
+  </footer>
+</div>
+
+<script src="script.js"></script>
+<script>
+    
+    let currentTheme = localStorage.getItem('gameTheme') || 'dark';
+    
+    function initTheme() {
+        document.body.className = `theme-${currentTheme}`;
+        
+        const buttons = document.querySelectorAll('.theme-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.theme === currentTheme) {
+                btn.classList.add('active');
+            }
+        });
+        
+        const switcher = document.getElementById('theme-switcher');
+        if (switcher) {
+            switcher.addEventListener('click', (e) => {
+                if (e.target.classList.contains('theme-btn')) {
+                    const theme = e.target.dataset.theme;
+                    setTheme(theme);
+                }
+            });
+        }
+    }
+    
+    function setTheme(themeName) {
+        document.body.className = `theme-${themeName}`;
+        currentTheme = themeName;
+        localStorage.setItem('gameTheme', themeName);
+        
+        const buttons = document.querySelectorAll('.theme-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.theme === themeName) {
+                btn.classList.add('active');
+            }
+        });
+        
+        SoundManager.click();
+        
+        if (window.themeChangeInitiated) {
+            NotificationManager.show(`Тема: ${getThemeName(themeName)}`, 'success', 1500);
+        }
+    }
+    
+    function getThemeName(theme) {
+        const names = {
+            'dark': 'Тёмная',
+            'light': 'Светлая',
+            'purple': 'Фиолетовая',
+            'green': 'Зелёная',
+            'blue': 'Синяя',
+            'orange': 'Оранжевая'
+        };
+        return names[theme] || theme;
+    }
+    
+    function rotateTheme() {
+        const themes = ['dark', 'light', 'purple', 'green', 'blue', 'orange'];
+        const currentIndex = themes.indexOf(currentTheme);
+        const nextIndex = (currentIndex + 1) % themes.length;
+        window.themeChangeInitiated = true;
+        setTheme(themes[nextIndex]);
+    }
+
+    function startGame() {
+        const nameInput = document.getElementById('nameInput');
+        const name = nameInput.value.trim();
+
+        if (!name || name.length === 0) {
+            nameInput.style.borderColor = 'var(--error)';
+            NotificationManager.show("Введите ваше имя!", 'error');
+            return;
+        }
+
+        UserManager.login(name);
+    }
+
+    function logoutCurrentUser() {
+        if (confirm("Вы уверены, что хотите сменить игрока?")) {
+            UserManager.logout();
+        }
+    }
+
+    function showAdvancedInstructions() {
+        const message = `🎮 ПРАВИЛА ИГРЫ 🎮
+
+Уровень 1 (Пары слов):
+• Перетаскивайте слова в подходящие категории
+• У вас есть 90 секунд
+• Избегайте ошибок
+
+Уровень 2 (Падающие слова):
+• Слова появляются сверху и падают вниз
+• ЛКМ - перетащить в категорию
+• ПКМ - пропустить лишнее слово
+• Не дайте словам упасть!
+
+Уровень 3 (Экстремальная скорость):
+• Максимальная сложность
+• Динамические категории
+• Высокая скорость игры
+• Требует быстрой реакции!`;
+        
+        NotificationManager.show(message, 'info', 8000);
+    }
+
+    function showThemeInfo() {
+        window.themeChangeInitiated = true;
+        NotificationManager.show("🎨 Темы оформления\n\nВыберите цветовую схему из переключателя в правом верхнем углу", 'info', 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initTheme();
+        
+        const nameInput = document.getElementById('nameInput');
+        if (nameInput) {
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startGame();
+                }
+            });
+            nameInput.focus();
+        }
+
+        const adminTriggers = [
+            'admin', 'админ',
+            'vip', 'вип',
+            'god', 'год',
+            'bog', 'бог',
+            'test', 'тест',
+            'root', 'рут',
+            'dev', 'дев',
+            'debug', 'дебаг',
+            'super', 'супер',
+            'boss', 'босс',
+            'а-д-м-и-н',
+            'фвьшт',
+            'flvby',
+            'мшз',
+            'dbg',
+            'пщв',
+            'еуые',
+            'ntcn',
+            'кщще',
+            'hen'
+        ].map(s => s.toLowerCase());
+
+        const maxTriggerLen = adminTriggers.reduce((m, s) => Math.max(m, s.length), 0);
+        let keyBuffer = '';
+
+        document.addEventListener('keydown', (event) => {
+            const key = (event.key || '').toLowerCase();
+
+            if (key.length !== 1) return;
+
+            keyBuffer = (keyBuffer + key).slice(-maxTriggerLen);
+
+            for (const trigger of adminTriggers) {
+                if (keyBuffer.endsWith(trigger)) {
+                    keyBuffer = '';
+                    unlockAllLevels();
+                    break;
+                }
+            }
+        });
+
+        if (nameInput) {
+            nameInput.addEventListener('input', () => {
+                const value = (nameInput.value || '').trim().toLowerCase();
+                if (!value) return;
+
+                if (adminTriggers.includes(value)) {
+                    unlockAllLevels();
+                    nameInput.value = '';
+                }
+            });
+        }
+        
+        
+        updateLogoutButton();
+    });
+
+    function updateLogoutButton() {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            if (UserManager.user) {
+                logoutBtn.style.display = 'block';
+            } else {
+                logoutBtn.style.display = 'none';
+            }
+        }
+    }
+
+    function resetProgress() {
+    if (!UserManager.user) return;
+
+    if (confirm("Вы уверены? Это сбросит весь ваш прогресс.")) {
+        
+        const userName = UserManager.user.name;
+        
+        
+        UserManager.user.unlocked = 1;
+        UserManager.user.completedLevels = [];
+        UserManager.user.attempts = {};
+        UserManager.user.bestTimes = {};
+        UserManager.user.levelScores = {};
+        UserManager.user.score = 0;
+        
+        
+        UserManager.save();
+        
+        
+        LeaderboardManager.updatePlayer(UserManager.user);
+        
+      
+        NotificationManager.show("Прогресс сброшен! 🧹", 'warning', 2000);
+        
+      
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+}
+
+    function loadMiniLeaderboard() {
+        const container = document.getElementById('mini-leaderboard');
+        const totalPlayersSpan = document.getElementById('total-players');
+        const leaders = LeaderboardManager.getTopPlayers(5);
+        const allPlayers = LeaderboardManager.getAllPlayers();
+
+        if (totalPlayersSpan) {
+            totalPlayersSpan.textContent = allPlayers.length;
+        }
+
+        if (leaders.length === 0) {
+            container.innerHTML = '<p style="opacity: 0.6; font-size: 0.9em;">Пока нет результатов</p>';
+            return;
+        }
+
+        let html = '<div class="mini-leaderboard-list">';
+        leaders.forEach((player, index) => {
+            const medal = `${index + 1}.`;
+            const isCurrentUser = UserManager.user && player.name === UserManager.user.name;
+            
+            html += `
+                <div class="mini-leader-item ${isCurrentUser ? 'current-user' : ''}">
+                    <span class="leader-rank">${medal}</span>
+                    <span class="leader-name">${player.name}</span>
+                    <span class="leader-score">${player.score}</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function unlockAllLevels() {
+        if (!UserManager.user) {
+            try {
+                localStorage.setItem('ssw_admin_pending', '1');
+            } catch (e) {}
+            NotificationManager.show(
+                "✅ Код принят! Теперь введите имя и нажмите «Начать игру» — админка включится автоматически.",
+                'success',
+                6000
+            );
+            return;
+        }
+        UserManager.user.unlocked = 3;
+        UserManager.user.completedLevels = [1, 2, 3];
+        UserManager.save();
+        NotificationManager.show("Режим администратора активирован: все уровни разблокированы!", 'success', 5000);
+        setTimeout(() => window.location.reload(), 3000);
+    }
+
+    window.onload = () => {
+        AnimatedBackground.init();
+        initTheme();
+
+        if (UserManager.user) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'block';
+            document.getElementById('welcome-text').innerText = UserManager.user.name;
+            document.getElementById('score-text').innerText = UserManager.user.score;
+            document.getElementById('completed-text').innerText =
+                UserManager.user.completedLevels.length + '/3';
+
+            try {
+                if (localStorage.getItem('ssw_admin_pending') === '1') {
+                    localStorage.removeItem('ssw_admin_pending');
+                    unlockAllLevels();
+                    return;
+                }
+            } catch (e) {}
+
+            loadMiniLeaderboard();
+
+            for(let i = 1; i <= 3; i++) {
+                const card = document.getElementById(`lvl${i}`);
+                const statsDiv = document.getElementById(`stats-${i}`);
+
+                if (i > UserManager.user.unlocked) {
+                    card.classList.add('disabled');
+                    card.style.cursor = 'not-allowed';
+                }
+
+                if (UserManager.user.completedLevels.includes(i)) {
+                    card.classList.add('completed');
+
+                    const attempts = UserManager.user.attempts[i] || 0;
+                    const bestTime = UserManager.user.bestTimes[i];
+                    let statsHTML = '<small>Пройдено';
+
+                    if (bestTime) {
+                        const mins = Math.floor(bestTime / 60);
+                        const secs = bestTime % 60;
+                        statsHTML += ` | ${mins}:${secs.toString().padStart(2, '0')}`;
+                    }
+
+                    if (attempts > 1) {
+                        statsHTML += ` | ${attempts}x`;
+                    }
+
+                    statsHTML += '</small>';
+                    statsDiv.innerHTML = statsHTML;
+                }
+            }
+        } else {
+            setTimeout(() => {
+                const input = document.getElementById('nameInput');
+                if (input) input.focus();
+            }, 100);
+        }
+        
+        
+        updateLogoutButton();
+    };
+
+    function goTo(lvl) {
+        if (UserManager.user && lvl <= UserManager.user.unlocked) {
+            SoundManager.click();
+            window.location.href = `Levels/Level${lvl}/select-mode.html`;
+        } else {
+            SoundManager.error();
+            NotificationManager.show("Этот уровень пока недоступен!\nПройдите предыдущие уровни, чтобы разблокировать.", 'error', 5000);
+        }
+    }
+</script>
+</body>
+</html>

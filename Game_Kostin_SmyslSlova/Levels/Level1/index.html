@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Уровень 1</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="large-header" style="background: linear-gradient(45deg, rgb(67,74,119), rgba(86,99,184,0.3));
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 85vh;"></div>
+<canvas id="demo-canvas"></canvas>
+
+<div class="container level-container">
+    <div class="card level1-card">
+        <div id="game-area" class="game-area">
+            <div id="zone-area" class="zone-area"></div>
+            <div id="words-area" class="words-area"></div>
+        </div>
+        <button class="btn" onclick="history.back()">В меню ⬅️</button>
+    </div>
+</div>
+    <script src="../../script.js"></script>
+    <script src="script.js"></script>
+<script>
+    (function() {
+        AnimatedBackground.init();
+    })();
+</script>
+</body>
+</html>

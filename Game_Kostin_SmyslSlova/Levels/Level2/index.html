@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Уровень 2</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="large-header" style="background: radial-gradient(circle,rgba(63, 94, 251, 0.4) 0%, rgba(252, 70, 107, 0.4) 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;"></div>
+<canvas id="demo-canvas"></canvas>
+
+<div class="container level-container">
+  <div class="card level2-card">
+    <div class="level-content">
+      <div id="storm-area" class="storm-area"></div>
+      <div id="categories-area" class="categories-area"></div>
+    </div>
+    <button class="btn level2-menu-btn" onclick="history.back()">В меню ⬅️</button>
+  </div>
+</div>
+<script src="../../script.js"></script>
+<script src="script.js"></script>
+<script>
+    (function() {
+        AnimatedBackground.init();
+    })();
+</script>
+</body>
+</html>

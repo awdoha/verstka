@@ -4,93 +4,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Задание 1 — Аквариум</title>
-  
-  <!-- ========== СТИЛИ ДЛЯ КНОПКИ ВОЗВРАТА ========== -->
   <style>
-    /* Кнопка возврата на главную страницу */
     .back-button {
-      display: block;                    /* Чтобы занимала всю ширину */
-      margin: 20px auto;                 /* Центрирование по горизонтали */
-      padding: 12px 24px;                /* Внутренние отступы для удобного нажатия */
-      background: #2e7d32;                /* Темно-зеленый цвет в стиле главной страницы */
-      color: white;                       /* Белый текст */
-      text-decoration: none;              /* Убираем подчеркивание ссылки */
-      font-weight: 700;                   /* Жирный шрифт */
-      border-radius: 8px;                 /* Скругленные углы */
-      text-align: center;                 /* Текст по центру */
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);  /* Тень для объема */
-      transition: background 0.3s ease;   /* Плавное изменение фона при наведении */
+      display: block;
+      margin: 20px auto;
+      padding: 12px 24px;
+      background: #2e7d32;
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s ease;
     }
     .back-button:hover {
-      background: #1b5e20;                /* Еще темнее при наведении */
+      background: #1b5e20;
     }
   </style>
-  
-  <!-- Подключаем внешний CSS-файл со всеми стилями аквариума -->
   <link rel="stylesheet" href="pic.css" />
 </head>
-
 <body>
-  <!-- КНОПКА ВОЗВРАТА НА ГЛАВНУЮ -->
-  <!-- "../index.html" означает "подняться на уровень выше и взять index.html" -->
   <a href="../index.html" class="back-button">← Вернуться на сайт</a>
-
-  <!-- ШАПКА С ИНФОРМАЦИЕЙ О СТУДЕНТЕ -->
   <header style="text-align: center; padding: 15px; background: #006064; color: white;">
     Костин Даниил, группа з5130903/30301
   </header>
-
-  <!-- ОСНОВНОЙ КОНТЕНТ -->
   <main>
-    <!-- ========== КОНТЕЙНЕР АКВАРИУМА ========== -->
-    <!-- Все элементы аквариума позиционируются относительно этого блока -->
     <div class="aquarium" id="aquarium">
-      
-      <!-- ========== ВОДОРОСЛЬ 1 (левая верхняя) ========== -->
-      <!-- Каждая водоросль состоит из двух частей: зеленой основы и белого блика -->
       <div class="grass1">
-        <!-- Зеленая часть водоросли (сама водоросль) -->
         <div class="green"></div>
-        <!-- Белый блик на водоросли (создает объем) -->
         <div class="white"></div>
       </div>
-      
-      <!-- ========== ВОДОРОСЛЬ 2 (правая верхняя) ========== -->
       <div class="grass2">
         <div class="green"></div>
         <div class="white"></div>
       </div>
-      
-      <!-- ========== ВОДОРОСЛЬ 3 (нижняя) ========== -->
       <div class="grass3">
         <div class="green"></div>
         <div class="white"></div>
       </div>
-      
-      <!-- ========== РЫБКА 1 (розовая, слева) ========== -->
-      <!-- Рыбка состоит из тела, хвоста, глаза и декоративных кругов на теле -->
       <div class="fish1">
-        <!-- Тело рыбы (овал с градиентом) -->
         <div class="body"></div>
-        <!-- Хвост рыбы (треугольник) -->
         <div class="tail"></div>
-        <!-- Глаз (черный круг) -->
         <div class="eye"></div>
-        
-        <!-- Декоративные полукруги на теле (создают узор) -->
-        <!-- top: 3% - расположение у верхнего края -->
         <div class="circle-pattern" style="top: 3%; border-color: hsl(323, 100%, 50%)"></div>
-        <!-- top: 34% - расположение чуть выше середины -->
         <div class="circle-pattern" style="top: 34%; border-color: hsl(323, 100%, 50%)"></div>
-        <!-- top: 64% - расположение чуть ниже середины -->
         <div class="circle-pattern" style="top: 64%; border-color: hsl(323, 100%, 50%)"></div>
-        <!-- Большой полукруг, занимающий почти всё тело -->
         <div class="circle-pattern circle-big" style="border-color: hsl(323, 100%, 50%)"></div>
-        <!-- hsl(323, 100%, 50%) - ярко-розовый цвет -->
       </div>
-      
-      <!-- ========== РЫБКА 2 (желтая, справа) ========== -->
-      <!-- Аналогичная структура, но без указания цвета (используется цвет по умолчанию) -->
       <div class="fish2">
         <div class="body"></div>
         <div class="tail"></div>
@@ -100,14 +61,9 @@
         <div class="circle-pattern" style="top: 64%"></div>
         <div class="circle-pattern circle-big"></div>
       </div>
-      
-      <!-- ========== ПЕСОК НА ДНЕ ========== -->
-      <!-- Полоса с текстурой песка в нижней части аквариума -->
       <div class="sand"></div>
     </div>
   </main>
-
-  <!-- ПОДВАЛ -->
   <footer style="text-align: center; padding: 10px; background: #004d40; color: white;">
     © 2026 Задание 1 — Аквариум | Создано для курса «Верстка и прототипирование сайтов»
   </footer>

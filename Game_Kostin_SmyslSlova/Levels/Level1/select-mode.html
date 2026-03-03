@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Уровень 1 - выбор сложности</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../select-mode.css">
+</head>
+<body>
+<div id="large-header" class="large-header">
+    <canvas id="demo-canvas"></canvas>
+</div>
+
+<div class="container select-mode-container">
+    <div class="card mode-card mode-theme-l1">
+        <div class="mode-header">
+            <h2>Уровень 1 - выберите сложность 🎯</h2>
+        </div>
+      <button class="btn" onclick="window.location.href='../../index.html'">← В меню 🏠</button>
+
+        <div class="mode-layout">
+            <div class="mode-options">
+                <p style="opacity:0.7;">Каждый режим меняет время, лимиты ошибок и начисление очков ✨.</p>
+                <div class="mode-grid">
+                    <button class="btn mode-btn" data-mode="normal">
+                        <strong>Нормальный 😊</strong>
+                        <span>90 сек, 5 промахов, 4 пары</span>
+                    </button>
+                    <button class="btn mode-btn" data-mode="hard">
+                        <strong>Сложный 💥</strong>
+                        <span>70 сек, 3 промаха, 5 пар</span>
+                    </button>
+                    <button class="btn mode-btn" data-mode="endless">
+                        <strong>Бесконечный ♾️</strong>
+                        <span>Без таймера, 3 промаха - игра окончена</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mode-info card compact-card" style="background: rgba(20,20,20,0.85);">
+                <h3 style="margin-bottom: 15px;">📖 Описание режимов</h3>
+                <div class="instruction-item">
+                    <p><strong>Нормальный:</strong> классический темп и правила, лучший режим для знакомства 😌.</p>
+                </div>
+                <div class="instruction-item">
+                    <p><strong>Сложный:</strong> меньше времени, больше пар и штрафов. Ошибаться нельзя! ⚠️</p>
+                </div>
+                <div class="instruction-item">
+                    <p><strong>Бесконечный:</strong> таймер отсутствует, но три ошибки завершают забег. Все очки сохраняются 💾.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../script.js"></script>
+<script>
+    (function() {
+        AnimatedBackground.init();
+        const LEVEL_ID = 1;
+        const currentMode = LevelModeManager.get(LEVEL_ID, 'normal');
+        const buttons = document.querySelectorAll('.mode-btn');
+
+        buttons.forEach(btn => {
+            const mode = btn.dataset.mode;
+            if (mode === currentMode) {
+                btn.classList.add('active');
+            }
+            btn.addEventListener('click', () => {
+                LevelModeManager.save(LEVEL_ID, mode);
+                SoundManager.click();
+                window.location.href = './index.html';
+            });
+        });
+    })();
+</script>
+<script>
+    (function() {
+        AnimatedBackground.init();
+    })();
+</script>
+</body>
+</html>
+
