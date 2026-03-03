@@ -3,34 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <title>Уровень 1</title>
+    
+    <!-- Подключаем общие стили -->
     <link rel="stylesheet" href="../../style.css">
+    <!-- Подключаем стили для первого уровня -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- ========== АНИМИРОВАННЫЙ ФОН ========== -->
+    <div id="large-header" style="background: linear-gradient(45deg, rgb(67,74,119), rgba(86,99,184,0.3));
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 85vh;"></div>
+    <canvas id="demo-canvas"></canvas>
 
-<div id="large-header" style="background: linear-gradient(45deg, rgb(67,74,119), rgba(86,99,184,0.3));
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 85vh;"></div>
-<canvas id="demo-canvas"></canvas>
-
-<div class="container level-container">
-    <div class="card level1-card">
-        <div id="game-area" class="game-area">
-            <div id="zone-area" class="zone-area"></div>
-            <div id="words-area" class="words-area"></div>
+    <!-- ========== ОСНОВНОЙ КОНТЕЙНЕР ========== -->
+    <div class="container level-container">
+        <!-- Карточка уровня -->
+        <div class="card level1-card">
+            
+            <!-- ===== ИГРОВАЯ ОБЛАСТЬ ===== -->
+            <div id="game-area" class="game-area">
+                <!-- Зона для категорий (квадраты) -->
+                <div id="zone-area" class="zone-area"></div>
+                <!-- Зона для слов (круги) -->
+                <div id="words-area" class="words-area"></div>
+            </div>
+            
+            <!-- Кнопка возврата в меню -->
+            <button class="btn" onclick="history.back()">В меню ⬅️</button>
         </div>
-        <button class="btn" onclick="history.back()">В меню ⬅️</button>
     </div>
-</div>
+    
+    <!-- Подключаем общие скрипты -->
     <script src="../../script.js"></script>
+    <!-- Подключаем скрипт первого уровня -->
     <script src="script.js"></script>
-<script>
-    (function() {
-        AnimatedBackground.init();
-    })();
-</script>
+    
+    <!-- Запуск анимированного фона -->
+    <script>
+        (function() {
+            AnimatedBackground.init();
+        })();
+    </script>
 </body>
 </html>
