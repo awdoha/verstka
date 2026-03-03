@@ -1,7 +1,23 @@
+/* ============================================================================
+   ========== СТИЛИ ДЛЯ УРОВНЯ 2 ==========
+   ============================================================================
+   Этот файл содержит стили для второго уровня:
+   - Область падающих слов (storm-area)
+   - Зоны категорий
+   - Падающие слова
+   - Анимации
+   ============================================================================ */
+
+/* ============================================================================
+   ========== 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+   ============================================================================ */
 :root {
-    --level-padding: clamp(12px, 2vw, 24px);
+    --level-padding: clamp(12px, 2vw, 24px);  /* Адаптивные отступы */
 }
 
+/* ============================================================================
+   ========== 2. БАЗОВЫЕ СТИЛИ ==========
+   ============================================================================ */
 html, body {
     height: 100%;
     width: 100%;
@@ -9,10 +25,13 @@ html, body {
 
 body {
     margin: 0;
-    overflow: hidden;
+    overflow: hidden;  /* Убираем прокрутку страницы */
     font-size: clamp(14px, 1.5vw, 17px);
 }
 
+/* ============================================================================
+   ========== 3. КОНТЕЙНЕР УРОВНЯ ==========
+   ============================================================================ */
 .level-container {
     height: 100vh;
     padding: var(--level-padding);
@@ -25,50 +44,61 @@ body {
     max-width: 100%;
 }
 
+/* ============================================================================
+   ========== 4. ОБЛАСТЬ ПАДАЮЩИХ СЛОВ ==========
+   ============================================================================ */
 .storm-area {
     min-height: 60px;
-    background: #2d3436;
+    background: #2d3436;              /* Темный фон */
     position: relative;
-    overflow: hidden;
-    border: 2px solid #fab1a0;
-    border-radius: 10px 10px 0 0;
+    overflow: hidden;                  /* Скрываем слова за границами */
+    border: 2px solid #fab1a0;         /* Персиковая рамка */
+    border-radius: 10px 10px 0 0;      /* Скругление только сверху */
     margin-bottom: 0;
-    flex: 1 1 0;
-    max-height: 60vh;
+    flex: 1 1 0;                       /* Растягивается */
+    max-height: 60vh;                  /* Не более 60% высоты экрана */
     max-width: 100%;
 }
+
+/* Декоративный элемент — красная подсветка внизу (опасная зона) */
 .storm-area::after {
     content: '';
     position: absolute;
-    bottom: -30px;
+    bottom: -30px;                     /* Частично за пределами */
     left: 0;
     width: 100%;
     height: 60px;
     background: linear-gradient(to bottom, transparent, rgba(214, 48, 49, 0.3));
-    pointer-events: none;
+    pointer-events: none;               /* Не перехватывает клики */
     border-radius: 0 0 10px 10px;
 }
 
+/* ============================================================================
+   ========== 5. ОБЛАСТЬ КАТЕГОРИЙ ==========
+   ============================================================================ */
 .categories-area {
     display: flex;
-    gap: clamp(6px, 1vw, 12px);
+    gap: clamp(6px, 1vw, 12px);        /* Адаптивные отступы */
     padding: clamp(10px, 1.5vw, 15px);
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 0 0 10px 10px;
-    flex-wrap: nowrap;
-    flex: 0 1 17vh;
+    border-radius: 0 0 10px 10px;       /* Скругление только снизу */
+    flex-wrap: nowrap;                   /* Категории в одну строку */
+    flex: 0 1 17vh;                      /* Фиксированная высота */
     max-width: 100%;
     max-height: min-content;
 }
 
+/* ============================================================================
+   ========== 6. ЗОНА КАТЕГОРИИ ==========
+   ============================================================================ */
 .category-zone {
-    flex: 1 1 0;
-    border: 3px dashed #74b9ff;
+    flex: 1 1 0;                        /* Все зоны одинаковой ширины */
+    border: 3px dashed #74b9ff;         /* Синяя пунктирная рамка */
     background: rgba(116, 185, 255, 0.1);
     border-radius: 10px;
     padding: clamp(8px, 1.5vw, 12px);
     text-align: center;
-    transition: all 0.3s;
+    transition: all 0.3s;                /* Плавные переходы */
     position: relative;
     overflow: hidden;
     font-size: clamp(0.2rem, 1.4vw, 4.35rem);
@@ -80,28 +110,31 @@ body {
     cursor: grab;
     user-select: none;
     z-index: 100;
-    transition: transform 0.1s;
     max-height: min(10vh, 280px);
 }
 
+/* Подсветка при перетаскивании над зоной */
 .category-zone.highlight {
-    border-color: #0984e3;
+    border-color: #0984e3;               /* Ярко-синяя рамка */
     background: rgba(116, 185, 255, 0.3);
-    transform: scale(1.05);
+    transform: scale(1.05);               /* Увеличение */
 }
 
+/* Анимация при правильном ответе */
 .category-zone.correct {
-    border-color: #00b894;
+    border-color: #00b894;               /* Зеленая рамка */
     background: rgba(0, 184, 148, 0.2);
     animation: successPulse 0.5s;
 }
 
+/* Анимация при ошибке */
 .category-zone.wrong {
-    border-color: #d63031;
+    border-color: #d63031;               /* Красная рамка */
     background: rgba(214, 48, 49, 0.2);
     animation: shake 0.5s;
 }
 
+/* Название категории */
 .category-label {
     font-weight: bold;
     font-size: clamp(0.2rem, calc(75% + 1.4vw), 1rem);
@@ -110,12 +143,14 @@ body {
     text-transform: uppercase;
 }
 
+/* Описание категории (для будущего использования) */
 .category-description {
     font-size: clamp(0.75em, 1.5vw, 0.95em);
     color: #dfe6e9;
     margin-bottom: 10px;
 }
 
+/* Счетчик пойманных слов */
 .category-counter {
     font-size: clamp(0.8em, 1.6vw, 0.95em);
     color: #00b894;
@@ -123,6 +158,9 @@ body {
     margin-top: clamp(2px, 0.8vw, 6px);
 }
 
+/* ============================================================================
+   ========== 7. ПАДАЮЩИЕ СЛОВА ==========
+   ============================================================================ */
 .falling-word {
     position: absolute;
     color: white;
@@ -135,26 +173,31 @@ body {
     cursor: grab;
     user-select: none;
     z-index: 100;
-    transition: transform 0.1s;
-    max-width: min(38vw, 280px);
+    transition: transform 0.1s;          /* Быстрая анимация при наведении */
+    max-width: min(38vw, 280px);         /* Не слишком широкие */
 }
 
 .falling-word:hover {
-    transform: scale(1.02);
+    transform: scale(1.02);               /* Легкое увеличение при наведении */
 }
 
+/* Состояние перетаскивания */
 .falling-word.dragging {
     cursor: grabbing;
-    transform: scale(1.2) rotate(5deg);
+    transform: scale(1.2) rotate(5deg);   /* Увеличение и поворот */
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 1000;                         /* Поверх всего */
 }
 
+/* Пойманное слово (исчезает) */
 .falling-word.caught {
-    pointer-events: none;
+    pointer-events: none;                  /* Не реагирует на события */
     opacity: 0;
 }
 
+/* ============================================================================
+   ========== 8. КАРТОЧКА УРОВНЯ ==========
+   ============================================================================ */
 .level2-card {
     display: flex;
     flex-direction: column;
@@ -172,6 +215,12 @@ body {
     overflow: hidden;
 }
 
+/* ============================================================================
+   ========== 9. СТАТИСТИКА ==========
+   ============================================================================ */
+.level-header {
+    /* Контейнер для статистики */
+}
 
 .level-title {
     font-size: clamp(1rem, 2vw, 1.25rem);
@@ -179,6 +228,7 @@ body {
     text-align: left;
 }
 
+/* Панель статистики (горизонтальная) */
 .level-stats-panel {
     display: flex;
     flex-wrap: nowrap;
@@ -188,6 +238,7 @@ body {
     overflow: hidden;
 }
 
+/* Элемент статистики */
 .stat-item {
     padding: clamp(8px, 1.6vw, 12px) clamp(10px, 2vw, 14px);
     border-radius: 14px;
@@ -195,7 +246,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
     flex: 1 1 0;
-    white-space: nowrap;
+    white-space: nowrap;                   /* Текст в одну строку */
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -217,24 +268,25 @@ body {
     align-items: baseline;
 }
 
+/* Цвета для разных типов статистики */
 .stat-item--bonus {
     white-space: nowrap;
 }
 
 .stat-item--time .stat-value {
-    color: #00b894;
+    color: #00b894;  /* Зеленый для времени */
 }
 
 .stat-item--good .stat-value {
-    color: #55efc4;
+    color: #55efc4;  /* Салатовый для пойманных */
 }
 
 .stat-item--bad .stat-value {
-    color: #ff7675;
+    color: #ff7675;  /* Красный для пропущенных */
 }
 
 .stat-item--bonus .stat-value {
-    color: #a29bfe;
+    color: #a29bfe;  /* Фиолетовый для бонусов */
 }
 
 .stat-item small {
@@ -242,19 +294,34 @@ body {
     opacity: 0.8;
 }
 
+/* ============================================================================
+   ========== 10. КНОПКА МЕНЮ ==========
+   ============================================================================ */
 .level2-menu-btn {
-    margin-top: auto;
+    margin-top: auto;                      /* Прижимаем к низу */
     align-self: center;
     width: clamp(160px, 40%, 260px);
 }
 
+/* ============================================================================
+   ========== 11. АНИМАЦИИ ==========
+   ============================================================================ */
+
+/* Пульсация успеха */
 @keyframes successPulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
 }
 
+/* Тряска при ошибке */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-10px); }
     75% { transform: translateX(10px); }
+}
+
+/* Пульсация таймера (будет добавлена через JS) */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }
