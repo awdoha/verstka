@@ -3,34 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <title>Уровень 3</title>
+  
+  <!-- Подключаем общие стили -->
   <link rel="stylesheet" href="../../style.css">
+  <!-- Подключаем стили для третьего уровня -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="large-header" style="background: linear-gradient(115deg,rgba(131, 58, 180, 0.3) 0%, rgba(253, 29, 29, 0.3) 50%, rgba(252, 176, 69, 0.3) 100%);
+  <!-- ========== АНИМИРОВАННЫЙ ФОН ========== -->
+  <div id="large-header" style="background: linear-gradient(115deg,rgba(131, 58, 180, 0.3) 0%, rgba(253, 29, 29, 0.3) 50%, rgba(252, 176, 69, 0.3) 100%);
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;"></div>
-<canvas id="demo-canvas"></canvas>
+  <canvas id="demo-canvas"></canvas>
 
-<div class="container level-container">
-  <div class="card level3-card">
-    <div class="level-content">
-      <canvas id="path-canvas" class="path-canvas" aria-hidden="true"></canvas>
-      <div id="storm-area" class="storm-area"></div>
-      <div id="categories-area" class="categories-area"></div>
+  <!-- ========== ОСНОВНОЙ КОНТЕЙНЕР ========== -->
+  <div class="container level-container">
+    <!-- Карточка уровня -->
+    <div class="card level3-card">
+      
+      <!-- ===== ИГРОВАЯ ОБЛАСТЬ ===== -->
+      <div class="level-content">
+        <!-- Canvas для отрисовки путей -->
+        <canvas id="path-canvas" class="path-canvas" aria-hidden="true"></canvas>
+        <!-- Область для падающих слов -->
+        <div id="storm-area" class="storm-area"></div>
+        <!-- Область для категорий -->
+        <div id="categories-area" class="categories-area"></div>
+      </div>
+      
+      <!-- Кнопка возврата в меню -->
+      <button class="btn level2-menu-btn" onclick="history.back()">В меню ⬅️</button>
     </div>
-    <button class="btn level2-menu-btn" onclick="history.back()">В меню ⬅️</button>
   </div>
-</div>
-<script src="../../script.js"></script>
-<script src="script.js"></script>
-<script>
+  
+  <!-- Подключаем общие скрипты -->
+  <script src="../../script.js"></script>
+  <!-- Подключаем скрипт третьего уровня -->
+  <script src="script.js"></script>
+  
+  <!-- Запуск анимированного фона -->
+  <script>
     (function() {
         AnimatedBackground.init();
     })();
-</script>
+  </script>
 </body>
 </html>
