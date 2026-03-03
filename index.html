@@ -1,87 +1,301 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Туристический гид по Гатчине</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>Задание 4 - Собрать домик</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* ========== КОНТЕЙНЕР ДЛЯ ПАЗЛА ========== */
+        .puzzle-area {
+            position: relative;           /* Все фигуры позиционируются относительно этого блока */
+            width: 550px;                  /* Ширина рабочей области */
+            height: 350px;                 /* Высота рабочей области */
+            border: 4px solid orange;      /* Оранжевая рамка (выделяет область) */
+            margin: 50px auto;             /* Центрирование по горизонтали */
+            background: #FFFFFF;            /* Белый фон */
+        }
+
+        /* ========== ПАНЕЛЬ УПРАВЛЕНИЯ ========== */
+        .puzzle-controls {
+            display: flex;
+            flex-direction: column;         /* Кнопка одна, но могло быть больше */
+            align-items: center;            /* Центрирование по горизонтали */
+            gap: 20px;
+            width: 100%;
+            margin: 20px auto 50px auto;
+            background: #EBD1BB;             /* Бежевый фон */
+            padding: 30px 0;
+            border-radius: 15px;
+        }
+
+        /* ========== КНОПКА ПРОВЕРКИ ========== */
+        .check-btn {
+            background: #4C2B08;             /* Темно-коричневый */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            min-width: 250px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .check-btn:hover {
+            transform: translateY(-2px);      /* Приподнимается при наведении */
+            box-shadow: 0 5px 15px rgba(76, 43, 8, 0.4);
+        }
+
+        /* ========== ОБЩИЕ СТИЛИ ДЛЯ ФИГУР ========== */
+        .shape {
+            position: absolute;              /* Все фигуры позиционируются абсолютно */
+            cursor: grab;                    /* Курсор "схватить" */
+        }
+        .shape:active {
+            cursor: grabbing;                 /* Курсор "схвачено" при перетаскивании */
+        }
+
+        /* ========== ЗЕЛЕНЫЕ ТРЕУГОЛЬНИКИ (ЧАСТИ ДЕРЕВА) ========== */
+        /* Нижняя часть дерева (самая большая) */
+        .green1 { 
+            background: #21A443; 
+            width: 150px; 
+            height: 90px;
+            clip-path: polygon(75px 0, 150px 90px, 0 90px);  /* Форма треугольника */
+            top: 220px; 
+            left: 100px; 
+            z-index: 30;
+            transform: rotate(270deg);        /* Повернут на 270° */
+        }
+
+        /* Средняя часть дерева */
+        .green2 { 
+            background: #73EA6C; 
+            width: 120px; 
+            height: 70px;
+            clip-path: polygon(60px 0, 120px 70px, 0 70px);
+            top: 80px; 
+            left: 390px; 
+            z-index: 31;
+            transform: rotate(90deg);
+        }
+
+        /* Верхняя часть дерева */
+        .green3 { 
+            background: #D2FF8E; 
+            width: 90px; 
+            height: 60px;
+            clip-path: polygon(45px 0, 90px 60px, 0 60px);
+            top: 80px; 
+            left: 300px; 
+            z-index: 32;
+            transform: rotate(90deg); 
+        }
+
+        /* ========== СТВОЛ ДЕРЕВА ========== */
+        .trunk {
+            width: 30px; 
+            height: 70px;
+            background: #82271A;              /* Коричневый */
+            top: 200px; 
+            left: 350px;
+            z-index: 20;
+            transform: rotate(90deg);          /* Повернут горизонтально */
+        }
+
+        /* ========== СТЕНА ДОМИКА (КРАСНЫЙ КВАДРАТ) ========== */
+        .red-square {
+            width: 100px; 
+            height: 100px;
+            background: #FF0000;               /* Ярко-красный */
+            top: 110px; 
+            left: 80px;
+            z-index: 10;
+            transform: rotate(45deg);           /* Повернут на 45° (ромб) */
+        }
+
+        /* ========== ОКНО (СИНИЙ КВАДРАТ) ========== */
+        .blue-square {
+            width: 40px; 
+            height: 40px;
+            background: #43BBEA;                /* Голубой */
+            top: 50px; 
+            left: 480px;
+            border-radius: 6px;                  /* Чуть скругленные углы */
+            z-index: 12;
+        }
+
+        /* ========== КРЫША ДОМИКА (КОРИЧНЕВЫЙ ТРЕУГОЛЬНИК) ========== */
+        .brown-triangle {
+            width: 110px; 
+            height: 70px;
+            background: #B28864;                 /* Светло-коричневый */
+            clip-path: polygon(55px 0, 0 70px, 110px 70px);  /* Форма треугольника */
+            top: 170px; 
+            left: 200px;
+            z-index: 11;
+            transform: rotate(225deg);            /* Повернут */
+        }
+
+        /* ========== ВСПЛЫВАЮЩИЕ ОКНА (УСПЕХ/ОШИБКА) ========== */
+        .success-popup, .error-popup {
+            position: fixed;                     /* Фиксированное позиционирование относительно окна */
+            top: 50%;                             /* Центрирование по вертикали */
+            left: 50%;                             /* Центрирование по горизонтали */
+            background: white;
+            z-index: 99999;                        /* Очень высокий слой (поверх всего) */
+            text-align: center;
+            display: none;                         /* По умолчанию скрыты */
+            opacity: 0;
+        }
+
+        /* Окно успеха */
+        .success-popup {
+            padding: 40px 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 4px solid #4CAF50;             /* Зеленая рамка */
+        }
+
+        /* Окно ошибки */
+        .error-popup {
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 4px solid #FF9800;             /* Оранжевая рамка */
+            max-width: 450px;
+        }
+
+        /* ========== АНИМАЦИИ ДЛЯ ВСПЛЫВАЮЩИХ ОКОН ========== */
+        .popup-show {
+            display: block !important;
+            animation: popupFadeIn 0.3s forwards;  /* Плавное появление */
+        }
+        .popup-hide {
+            animation: popupFadeOut 0.3s forwards; /* Плавное исчезновение */
+        }
+
+        @keyframes popupFadeIn {
+            0% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            70% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+            100% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes popupFadeOut {
+            0% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+
+        /* ========== ТЕКСТ ВО ВСПЛЫВАЮЩИХ ОКНАХ ========== */
+        .success-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E7D32;                        /* Темно-зеленый */
+        }
+        .error-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #D32F2F;                         /* Темно-красный */
+        }
+
+        /* ========== БЛОК ИНСТРУКЦИИ ========== */
+        .instruction-box {
+            background: #f8f9fa;
+            border-left: 4px solid orange;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 550px;
+            border-radius: 8px;
+        }
+        .instruction-box h3 {
+            margin-top: 0;
+            color: #4C2B08;
+        }
+        .instruction-box ul {
+            margin-bottom: 0;
+        }
+
+        /* ========== КНОПКА ВОЗВРАТА ========== */
+        .back-link {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background: #4C2B08;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            background: #6b3e0b;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="logo" aria-label="Логотип — Гатчинский дворец">
-      <div class="column left"></div>
-      <div class="column center"></div>
-      <div class="column right"></div>
-      <div class="roof"></div>
-      <div class="park"></div>
+    <!-- КНОПКА ВОЗВРАТА -->
+    <div style="text-align: center; padding: 20px;">
+        <a href="../index.html" class="back-link">← Вернуться на главную</a>
     </div>
-    <nav>
-      <a href="index.html" class="active">Главная</a>
-      <a href="#attractions">Маршруты</a>
-      <a href="#contacts">Контакты</a>
-      <a href="zadanie1/index.html">Задание 1</a>
-      <a href="zadanie2/index.html">Задание 2</a>
-      <a href="zadanie3/index.html">Задание 3</a>
-      <a href="zadanie4/index.html">Задание 4</a>
-      <a href="Game_Kostin_SmyslSlova/index.html">Смысл слова</a>
-    </nav>
-  </header>
-  <main>
-    <section class="hero">
-      <h1>Добро пожаловать в Гатчину — императорскую жемчужину Ленинградской области!</h1>
-      <p>Откройте для себя величие дворцов, тайны подземных ходов и красоту старинных парков</p>
-      <a href="#attractions" class="btn-primary">Начать путешествие</a>
-    </section>
-    <section class="intro-text">
-      <h2>О городе Гатчина</h2>
-      <p>Гатчина — один из самых живописных и исторически значимых городов Ленинградской области, расположенный всего в 45 километрах от Санкт-Петербурга. Основанный в XVIII веке, город стал резиденцией российских императоров и до сих пор хранит дух аристократической эпохи. Главной достопримечательностью Гатчины является величественный Гатчинский дворец, построенный архитектором Антонио Ринальди для графа Григория Орлова, а позже подаренный Екатериной II её сыну Павлу I.</p>
-      <p>Дворец окружён обширным парком с прудами, мостами и павильонами, среди которых особенно выделяется «Эхо» — аккустический грот, где шёпот слышен на расстоянии. Под землёй проложена уникальная система подземных ходов, использовавшихся для тайных выходов императора. Сегодня Гатчинский дворец — музей, входящий в состав «Музеев Московского Кремля», и входит в список объектов Всемирного наследия ЮНЕСКО как часть «Исторического центра Санкт-Петербурга и связанных с ним ансамблей».</p>
-      <p>Город активно развивает культурное наследие: здесь проводятся реконструкции, фестивали исторических костюмов, музыкальные вечера в парке и образовательные программы для школьников. Гатчина — не только место для туристов, но и центр просвещения, где история оживает через интерактивные экспозиции и театральные постановки.</p>
-      <p>Помимо дворца, в Гатчине стоит посетить Белосельский-Белозерский дворец, Александровскую церковь, музей авиации и космонавтики имени Гагарина, а также знаменитый Гатчинский аэродром — один из первых в России. Природа региона отличается мягкими ландшафтами, чистыми озёрами и сосновыми лесами, что делает город идеальным местом для семейного отдыха.</p>
-      <p>Современная Гатчина сочетает историческую атмосферу с развитой инфраструктурой: удобные отели, кафе с авторской кухней, велодорожки и экологические маршруты. Город гордится своими жителями — потомками дворцовых служителей, учёных и военных, чья преданность делу сформировала уникальный характер Гатчины.</p>
-    </section>
-    <section id="attractions" class="image-gallery">
-      <div class="image-wrapper">
-        <img src="images/gatchina_palace.jpg" alt="Гатчинский дворец" />
-        <figcaption>Главный фасад Гатчинского дворца</figcaption>
-      </div>
-      <div class="image-wrapper">
-        <img src="images/gatchina_park.jpg" alt="Парк Гатчинского дворца" />
-        <figcaption>Английский парк с прудами</figcaption>
-      </div>
-      <div class="image-wrapper">
-        <img src="images/gatchina_echo.jpg" alt="Павильон Эхо" />
-        <figcaption>Павильон «Эхо» — акустическое чудо</figcaption>
-      </div>
-      <div class="image-wrapper">
-        <img src="images/gatchina_aerodrome.jpg" alt="Гатчинский аэродром" />
-        <figcaption>Исторический аэродром</figcaption>
-      </div>
-    </section>
-    <section class="highlights">
-      <h2>Что стоит посетить</h2>
-      <div class="cards">
-        <article class="card"><h3>Гатчинский дворец</h3><p>Экскурсии по парадным залам и подземным ходам.</p></article>
-        <article class="card"><h3>Парк «Эхо»</h3><p>Прогулка по аллеям с акустическими загадками.</p></article>
-        <article class="card"><h3>Музей авиации</h3><p>История полётов от братьев Райт до Гагарина.</p></article>
-        <article class="card"><h3>Центр города</h3><p>Уютные улицы, кафе и памятники XIX века.</p></article>
-        <article class="card"><h3>Озеро Сиверское</h3><p>Отдых на природе, рыбалка, веломаршруты.</p></article>
-        <article class="card"><h3>Фестиваль «Императорские прогулки»</h3><p>Ежегодное событие с реконструкциями и балами.</p></article>
-      </div>
-    </section>
-    <section id="contacts" class="contacts-section">
-      <h2>Контакты</h2>
-      <p>Свяжитесь с нами для организации экскурсий:</p>
-      <ul>
-        <li>Email: info@gatchina-guide.ru</li>
-        <li>Телефон: +7 (813) 712-34-56</li>
-        <li>Адрес: Ленинградская обл., г. Гатчина, Дворцовая пл., 1</li>
-      </ul>
-    </section>
-  </main>
-  <footer>
-    © 2026 Туристический гид по Гатчине 
-  </footer>
+
+    <!-- БЛОК ИНСТРУКЦИИ -->
+    <div class="instruction-box">
+        <h3>🎯 Задание: Собрать домик и дерево</h3>
+        <ul>
+            <li><strong>Дерево:</strong> зелёные треугольники (green1, green2, green3) должны быть сложены пирамидкой, ствол (trunk) под ними</li>
+            <li><strong>Домик:</strong> красный квадрат (red-square) - основа, синий квадрат (blue-square) - окно внутри, коричневый треугольник (brown-triangle) - крыша сверху</li>
+            <li><strong>Поворот:</strong> дважды кликните по элементу для поворота на 45°</li>
+            <li><strong>Перемещение:</strong> просто перетащите элемент мышкой</li>
+        </ul>
+    </div>
+
+    <!-- ОБЛАСТЬ ДЛЯ СБОРКИ -->
+    <div class="puzzle-area">
+        <div id="elements">
+            <!-- Все 7 фигур с классами draggable (для JS) -->
+            <div class="shape green1 draggable"></div>
+            <div class="shape green2 draggable"></div>
+            <div class="shape green3 draggable"></div>
+            <div class="shape trunk draggable"></div>
+            <div class="shape red-square draggable"></div>
+            <div class="shape blue-square draggable"></div>
+            <div class="shape brown-triangle draggable"></div>
+        </div>
+    </div>
+
+    <!-- КНОПКА ПРОВЕРКИ -->
+    <div class="puzzle-controls">
+        <button id="puzzle-check-btn" class="check-btn">
+            Проверить сборку
+        </button>
+    </div>
+
+    <!-- ВСПЛЫВАЮЩЕЕ ОКНО УСПЕХА (изначально скрыто) -->
+    <div id="success-popup" class="popup success-popup" style="display: none;">
+        <div class="success-title">✓ Рисунок собран верно!</div>
+        <p style="margin-top: 10px;">Отличная работа! 🎉</p>
+    </div>
+
+    <!-- ВСПЛЫВАЮЩЕЕ ОКНО ОШИБКИ (изначально скрыто) -->
+    <div id="error-popup" class="popup error-popup" style="display: none;">
+        <div class="error-title">✗ Требуются исправления</div>
+        <p style="margin-top: 10px;">Проверьте расположение и углы поворота элементов</p>
+    </div>
+
+    <!-- ПОДКЛЮЧЕНИЕ JAVASCRIPT -->
+    <script src="script.js"></script>
 </body>
 </html>
