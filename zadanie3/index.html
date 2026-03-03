@@ -4,94 +4,118 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Задание 3 — Многоуровневый список</title>
+  
+  <!-- ========== СТИЛИ ДЛЯ СТРАНИЦЫ ========== -->
   <style>
+    /* Кнопка возврата на главную (такая же, как в других заданиях) */
     .back-button {
-      display: block;
-      margin: 20px auto;
-      padding: 12px 24px;
-      background: #2e7d32;
-      color: white;
-      text-decoration: none;
-      font-weight: 700;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      transition: background 0.3s ease;
+      display: block;                    /* Блочный элемент на всю ширину */
+      margin: 20px auto;                 /* Центрирование */
+      padding: 12px 24px;                /* Внутренние отступы */
+      background: #2e7d32;                /* Зеленый цвет */
+      color: white;                       /* Белый текст */
+      text-decoration: none;              /* Без подчеркивания */
+      font-weight: 700;                   /* Жирный */
+      border-radius: 8px;                 /* Скругление */
+      text-align: center;                 /* Текст по центру */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);  /* Тень */
+      transition: background 0.3s ease;   /* Плавное изменение фона */
     }
     .back-button:hover {
-      background: #1b5e20;
+      background: #1b5e20;                /* Темнее при наведении */
     }
+    
+    /* Базовые стили для всей страницы */
     body {
-      font-family: Arial, sans-serif;
-      background: #f1f8e9;
-      margin: 0;
+      font-family: Arial, sans-serif;      /* Шрифт */
+      background: #f1f8e9;                 /* Светло-зеленый фон (как на главной) */
+      margin: 0;                            /* Убираем отступы */
       padding: 0;
     }
+    
+    /* Шапка страницы */
     header {
-      text-align: center;
-      padding: 15px;
-      background: #006064;
-      color: white;
+      text-align: center;                   /* Текст по центру */
+      padding: 15px;                        /* Внутренние отступы */
+      background: #006064;                   /* Темно-бирюзовый */
+      color: white;                          /* Белый текст */
     }
+    
+    /* Основной контент */
     main {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 0 20px;
+      max-width: 800px;                      /* Максимальная ширина */
+      margin: 20px auto;                      /* Центрирование */
+      padding: 0 20px;                        /* Отступы по бокам */
     }
+    
+    /* Контейнер для кнопок */
     .controls {
-      text-align: center;
-      margin: 20px 0;
+      text-align: center;                     /* Кнопки по центру */
+      margin: 20px 0;                          /* Отступы сверху/снизу */
     }
+    
+    /* Стили для кнопок */
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 0 10px;
-      background: #388e3c;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      padding: 10px 20px;                      /* Внутренние отступы */
+      font-size: 16px;                         /* Размер шрифта */
+      margin: 0 10px;                           /* Отступы между кнопками */
+      background: #388e3c;                       /* Зеленый фон */
+      color: white;                              /* Белый текст */
+      border: none;                              /* Без рамки */
+      border-radius: 6px;                        /* Скругление */
+      cursor: pointer;                           /* Курсор-указатель */
     }
     button:hover {
-      background: #2e7d32;
+      background: #2e7d32;                        /* Темнее при наведении */
     }
 
-    
+    /* ========== КЛАССЫ ДЛЯ ЧЕРЕДОВАНИЯ ФОНА ========== */
+    /* Эти классы будут добавляться к элементам списка через JS */
     .class1 {
-      background-color: #ffebee; 
+      background-color: #ffebee;  /* Светло-розовый */
     }
     .class2 {
-      background-color: #e8f5e9; 
+      background-color: #e8f5e9;  /* Светло-зеленый */
     }
 
+    /* Стили для списка */
     aside ol {
-      counter-reset: item;
+      counter-reset: item;         /* Сброс счетчика для нумерации */
     }
     aside li {
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 6px;
+      margin-bottom: 15px;         /* Отступ между элементами */
+      padding: 10px;               /* Внутренние отступы */
+      border-radius: 6px;          /* Скругленные углы */
     }
   </style>
 </head>
 <body>
+  <!-- КНОПКА ВОЗВРАТА НА ГЛАВНУЮ -->
   <a href="../index.html" class="back-button">← Вернуться на сайт</a>
 
+  <!-- ШАПКА С ИНФОРМАЦИЕЙ О СТУДЕНТЕ -->
   <header>
     Костин Даниил, группа з5130903/30301
   </header>
 
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
   <main>
+    <!-- ========== ПАНЕЛЬ УПРАВЛЕНИЯ ========== -->
     <div class="controls">
+      <!-- Кнопка "Создать" — добавляет новый элемент в список -->
       <button id="createBtn">Создать</button>
+      <!-- Кнопка "Перекрасить" — меняет стили элементов -->
       <button id="recolorBtn">Перекрасить</button>
     </div>
 
+    <!-- ========== КОНТЕЙНЕР ДЛЯ СПИСКА ========== -->
+    <!-- Сюда будут динамически добавляться элементы -->
     <aside>
       <ol id="phraseList"></ol>
     </aside>
   </main>
 
+  <!-- ПОДКЛЮЧАЕМ JAVASCRIPT -->
   <script src="script.js"></script>
 </body>
 </html>
