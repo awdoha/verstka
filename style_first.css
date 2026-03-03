@@ -1,0 +1,378 @@
+/* ========== ГЛОБАЛЬНЫЕ НАСТРОЙКИ ========== */
+
+/* Плавная прокрутка для якорных ссылок */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ========== CSS-ПЕРЕМЕННЫЕ (CUSTOM PROPERTIES) ========== */
+/* Все основные цвета и тени вынесены в :root для легкой смены темы */
+:root {
+  --color-primary: #2e7d32;           /* Основной темно-зеленый (шапка, кнопки) */
+  --color-primary-light: #66bb6a;      /* Светло-зеленый (hover, акценты) */
+  --color-secondary: #1b5e20;          /* Темно-зеленый для подвала */
+  --color-background: #f1f8e9;         /* Светло-зеленый фон страницы */
+  --color-white: #ffffff;               /* Белый */
+  --shadow-light: rgba(46, 125, 50, 0.2);   /* Легкая тень (зеленоватая) */
+  --shadow-strong: rgba(46, 125, 50, 0.4);  /* Сильная тень */
+}
+
+/* ========== БАЗОВЫЕ СТИЛИ ДЛЯ BODY ========== */
+body {
+  font-family: 'Montserrat', sans-serif;  /* Подключенный шрифт */
+  background: var(--color-background);    /* Светло-зеленый фон */
+  margin: 0;
+  padding: 0;
+  color: #263238;                          /* Темно-серый цвет текста */
+  line-height: 1.65;                        /* Комфортная высота строки */
+}
+
+/* ========== ШАПКА (HEADER) ========== */
+header {
+  background: var(--color-primary);        /* Темно-зеленый фон */
+  color: var(--color-white);                /* Белый текст */
+  padding: 15px 30px;                        /* Отступы внутри шапки */
+  position: sticky;                          /* Прилипает к верху при прокрутке */
+  top: 0;                                    /* Прилипает к самому верху */
+  display: flex;                             /* Flexbox для расположения логотипа и меню */
+  justify-content: space-between;            /* Логотип слева, меню справа */
+  align-items: center;                       /* Выравнивание по вертикали */
+  box-shadow: 0 4px 10px var(--shadow-light); /* Тень под шапкой */
+  transition: background-color 0.3s ease;    /* Плавное изменение фона */
+  z-index: 10;                               /* Выше других элементов */
+}
+
+/* Класс для изменения шапки при прокрутке (добавляется через JS) */
+header.scrolled {
+  background-color: var(--color-secondary);  /* Еще темнее */
+  box-shadow: 0 8px 15px var(--shadow-strong); /* Более сильная тень */
+}
+
+/* ========== ЛОГОТИП (CSS-ФИГУРЫ) ========== */
+.logo {
+  width: 80px;                /* Размер логотипа 80x80px */
+  height: 80px;
+  flex-shrink: 0;             /* Запрещаем сжиматься */
+  position: relative;         /* Все внутренние элементы позиционируются относительно .logo */
+  background: white;          /* Белый фон */
+  border-radius: 50%;         /* Круглая форма */
+  display: flex;              /* Центрирование содержимого (на всякий случай) */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Общие стили для колонн */
+.logo .column {
+  position: absolute;         /* Абсолютное позиционирование внутри логотипа */
+  width: 6px;                 /* Толщина колонны */
+  height: 24px;               /* Высота колонны */
+  background: var(--color-secondary);  /* Темно-зеленый цвет */
+  border-radius: 3px;         /* Чуть скругленные углы */
+}
+
+/* Левая колонна */
+.logo .left { left: 28px; }   /* Отступ слева */
+
+/* Центральная колонна (точно по центру) */
+.logo .center { 
+  left: 50%;                  /* Ставим левый край в центр */
+  transform: translateX(-50%); /* Сдвигаем на половину ширины (точное центрирование) */
+}
+
+/* Правая колонна */
+.logo .right { right: 28px; }  /* Отступ справа */
+
+/* Крыша дворца (горизонтальная линия) */
+.logo .roof {
+  position: absolute;
+  top: 20px;                   /* Отступ сверху */
+  left: 20px;                  /* Отступ слева */
+  right: 20px;                 /* Отступ справа (растягивается) */
+  height: 4px;                 /* Толщина крыши */
+  background: var(--color-secondary);  /* Темно-зеленый */
+  border-radius: 2px;          /* Скругление */
+}
+
+/* Парк (зеленая полоса внизу) */
+.logo .park {
+  position: absolute;
+  bottom: 12px;                /* Прижат к низу */
+  left: 18px;                  /* Отступ слева */
+  right: 18px;                 /* Отступ справа */
+  height: 6px;                 /* Высота полосы */
+  background: #388e3c;         /* Зеленый цвет */
+  border-radius: 3px;          /* Скругление */
+}
+
+/* ========== НАВИГАЦИОННОЕ МЕНЮ ========== */
+nav {
+  display: flex;               /* Ссылки в ряд */
+  gap: 22px;                   /* Расстояние между ссылками */
+}
+
+/* Стили для ссылок в меню */
+nav a {
+  color: var(--color-white);    /* Белый текст */
+  text-decoration: none;        /* Убираем подчеркивание */
+  font-weight: 700;             /* Жирный шрифт */
+  padding: 12px 18px;           /* Внутренние отступы (больше область клика) */
+  border-radius: 7px;           /* Скругленные углы */
+  box-shadow: 0 3px 6px var(--shadow-light);  /* Легкая тень */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;  /* Плавные переходы */
+}
+
+/* Эффект при наведении и активная ссылка */
+nav a:hover, nav a.active {
+  background: var(--color-primary-light);  /* Светло-зеленый фон */
+  box-shadow: 0 8px 16px var(--shadow-strong);  /* Увеличенная тень */
+  color: #0d3b1d;                /* Очень темный зеленый текст */
+}
+
+/* ========== ОСНОВНОЙ КОНТЕНТ ========== */
+main {
+  max-width: 1140px;           /* Максимальная ширина контента */
+  margin: 40px auto;            /* Центрирование и отступы сверху/снизу */
+  padding: 0 25px;              /* Отступы по бокам */
+}
+
+/* ========== ГЕРОЙ-БЛОК ========== */
+.hero {
+  /* Два фона: градиент + изображение */
+  background-image: linear-gradient(145deg, rgba(46,125,50,0.85), rgba(33,97,39,0.75)), 
+                    url('images/gatchina_palace.jpg');
+  background-size: cover;        /* Изображение покрывает весь блок */
+  background-position: center;   /* Центрирование фона */
+  border-radius: 20px;           /* Скругленные углы */
+  color: var(--color-white);      /* Белый текст */
+  padding: 100px 40px;            /* Большие внутренние отступы */
+  text-align: center;             /* Текст по центру */
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);  /* Тень */
+  margin-bottom: 40px;            /* Отступ снизу */
+}
+
+/* Заголовок в герой-блоке */
+.hero h1 {
+  font-size: 3.8rem;              /* Очень крупный шрифт */
+  font-weight: 900;               /* Максимальная жирность */
+  letter-spacing: 0.07em;         /* Разреженные буквы */
+  margin-bottom: 20px;
+  text-shadow: 2px 4px 7px rgba(20, 50, 20, 0.7);  /* Тень для читаемости */
+}
+
+/* Подзаголовок в герой-блоке */
+.hero p {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 40px;
+  text-shadow: 1.5px 3px 5px rgba(25, 60, 25, 0.7);
+}
+
+/* ========== КНОПКА (ОСНОВНАЯ) ========== */
+.btn-primary {
+  background-color: var(--color-primary-light);  /* Светло-зеленый */
+  color: var(--color-secondary);                  /* Темно-зеленый текст */
+  padding: 18px 50px;                              /* Большие отступы */
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 90px;                             /* Очень скругленная (таблетка) */
+  box-shadow: 0 8px 20px var(--shadow-light);       /* Тень */
+  text-transform: uppercase;                        /* Все заглавные */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;                            /* Убираем подчеркивание */
+  display: inline-block;                            /* Чтобы работали отступы */
+}
+
+.btn-primary:hover {
+  background-color: #4caf50;                        /* Ярко-зеленый при наведении */
+  box-shadow: 0 12px 30px rgba(76, 175, 80, 0.6);   /* Увеличенная тень */
+}
+
+/* ========== ТЕКСТОВЫЙ БЛОК ========== */
+.intro-text h2, .highlights h2 {
+  font-size: 2.8rem;
+  color: var(--color-secondary);    /* Темно-зеленый */
+  border-bottom: 4px solid var(--color-primary-light);  /* Зеленая полоса под заголовком */
+  padding-bottom: 8px;
+  margin-bottom: 30px;
+}
+
+/* Параграфы в текстовом блоке */
+.intro-text p {
+  font-size: 1.25rem;
+  max-width: 850px;                 /* Ограничение ширины для удобства чтения */
+  margin-bottom: 25px;
+  text-align: justify;              /* Выравнивание по ширине */
+  color: #37474f;                   /* Темно-серый */
+}
+
+/* ========== ГАЛЕРЕЯ ИЗОБРАЖЕНИЙ ========== */
+.image-gallery {
+  display: flex;                    /* Flexbox для карточек */
+  flex-wrap: wrap;                  /* Перенос на новую строку */
+  gap: 25px;                        /* Расстояние между карточками */
+  justify-content: center;          /* Центрирование */
+  margin-bottom: 60px;
+}
+
+/* Обертка для изображения и подписи */
+.image-wrapper {
+  width: 48%;                       /* Две колонки на широком экране */
+  border-radius: 20px;
+  overflow: hidden;                 /* Скрываем выступающие части */
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);  /* Тень */
+  background: white;
+  text-align: center;
+  transition: transform 0.35s ease;  /* Плавное увеличение при наведении */
+}
+
+.image-wrapper:hover {
+  transform: scale(1.04);            /* Увеличение на 4% при наведении */
+}
+
+/* Изображение внутри карточки */
+.image-wrapper img {
+  width: 100%;                       /* На всю ширину родителя */
+  display: block;                    /* Убираем лишние отступы */
+  border-bottom: 5px solid var(--color-primary-light);  /* Зеленая полоса снизу */
+}
+
+/* Подпись под изображением */
+.image-wrapper figcaption {
+  padding: 12px 0;
+  font-style: italic;                 /* Курсив */
+  font-size: 1rem;
+  color: #607d8b;                     /* Серо-голубой */
+}
+
+/* ========== КАРТОЧКИ ========== */
+.highlights .cards {
+  display: grid;                       /* GRID — самая мощная система раскладки */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));  /* Адаптивная сетка */
+  gap: 30px;                            /* Расстояние между карточками */
+}
+
+/* Одна карточка */
+.card {
+  background-color: var(--color-white);  /* Белый фон */
+  border-radius: 25px;
+  box-shadow: 0 18px 40px rgba(46, 125, 50, 0.2);  /* Тень */
+  padding: 25px 30px;
+  font-weight: 500;
+  color: #263238;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;  /* Плавные эффекты */
+}
+
+.card:hover {
+  transform: translateY(-8px);          /* Поднимается вверх при наведении */
+  box-shadow: 0 28px 60px rgba(46, 125, 50, 0.35);  /* Увеличенная тень */
+}
+
+.card h3 {
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--color-primary);          /* Темно-зеленый */
+}
+
+/* ========== ПОДВАЛ ========== */
+footer {
+  background-color: var(--color-secondary);  /* Темно-зеленый */
+  color: var(--color-white);                  /* Белый текст */
+  text-align: center;
+  padding: 25px 10px;
+  font-size: 1rem;
+  letter-spacing: 0.04em;                     /* Разреженные буквы */
+  margin-top: 60px;                            /* Отступ сверху */
+}
+
+/* ========== МЕДИА-ЗАПРОСЫ (АДАПТИВНОСТЬ) ========== */
+
+/* Для планшетов (ширина до 768px) */
+@media (max-width: 768px) {
+  .logo { transform: scale(0.85); }            /* Уменьшаем логотип */
+  
+  header { 
+    padding: 12px 20px; 
+    flex-wrap: wrap;                            /* Перенос элементов */
+    gap: 10px;
+  }
+  
+  nav { 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 10px; 
+  }
+  
+  nav a { 
+    padding: 10px 15px; 
+    font-size: 0.9rem; 
+  }
+  
+  .hero { 
+    padding: 60px 25px; 
+    margin: 0 5px; 
+  }
+  
+  .hero h1 { font-size: clamp(2rem, 5vw, 2.5rem); }  /* Адаптивный размер */
+  .hero p { font-size: clamp(1.1rem, 4vw, 1.3rem); }
+  
+  .btn-primary { 
+    padding: 15px 30px; 
+    font-size: 1rem; 
+  }
+  
+  main { 
+    padding: 0 15px; 
+    margin: 20px auto; 
+  }
+  
+  .intro-text h2, .highlights h2 { 
+    font-size: clamp(1.8rem, 6vw, 2.2rem); 
+  }
+  
+  .image-wrapper { width: 100%; }                /* Одна колонка */
+  
+  .highlights .cards { 
+    grid-template-columns: 1fr;                  /* Одна колонка */
+    gap: 20px; 
+  }
+  
+  .card { padding: 20px; }
+}
+
+/* Для телефонов (ширина до 480px) */
+@media (max-width: 480px) {
+  .logo { transform: scale(0.72); }              /* Еще меньше логотип */
+  
+  header { 
+    flex-direction: column;                       /* Все в колонку */
+    gap: 15px; 
+    padding: 15px; 
+  }
+  
+  nav { 
+    order: 3;                                      /* Меню внизу */
+    width: 100%; 
+    justify-content: center; 
+  }
+  
+  .hero { 
+    padding: 40px 20px; 
+    margin: 0 10px; 
+  }
+  
+  footer { 
+    padding: 20px 15px; 
+    font-size: 0.9rem; 
+  }
+}
+
+/* Для очень маленьких телефонов */
+@media (max-width: 360px) {
+  .logo { transform: scale(0.65); }
+  nav { gap: 8px; }
+  nav a { 
+    padding: 8px 12px; 
+    font-size: 0.85rem; 
+  }
+}
