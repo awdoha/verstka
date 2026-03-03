@@ -839,3 +839,310 @@ const LeaderboardManager = {
      * Объединение карт статистики (attempts, bestTimes, levelScores)
      * @param {Object} existingMap - существующая карта
      * @param {Object} incomingMap - новая карта
+     * @param {boolean} preferLower - true если лучше меньшее значение (для времени)
+     * @returns {Object} - объединенная карта
+     */
+    mergeStatMap(existingMap, incomingMap, preferLower = false) {
+        const result = this.isPlainObject(existingMap) ? { ...existingMap } : {};
+        if (!this.isPlainObject(incomingMap)) return result;
+
+        Object.entries(incomingMap).forEach(([key, value]) => {
+            const parsedValue = this.toFiniteNumber(value, null);
+            if (parsedValue === null) return;
+
+            const existingValue = this.toFiniteNumber(result[key], null);
+            if (existingValue === null) {
+                result[key] = parsedValue;
+            } else if (preferLower && parsedValue < existingValue) {
+                result[key] = parsedValue;  // Берем меньшее (лучшее время)
+            } else if (!preferLower && parsedValue > existingValue) {
+                result[key] = parsedValue;  // Берем большее (лучший счет)
+            }
+        });
+
+        return result;
+    },
+
+    /**
+     * Выбор лучшего числового значения
+     */
+    pickBestNumber(first, second, preferLower = false, fallback = 0) {
+        const a = this.toFiniteNumber(first, null);
+        const b = this.toFiniteNumber(second, null);
+
+        if (a === null && b === null) return fallback;
+        if (a === null) return b;
+        if (b === null) return a;
+
+        return preferLower ? Math.min(a, b) : Math.max(a, b);
+    },
+
+    /**
+     * Приведение к конечному числу
+     */
+    toFiniteNumber(value, fallback = null) {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : fallback;
+    },
+
+    /**
+     * Проверка, является ли значение простым объектом
+     */
+    isPlainObject(value) {
+        return value !== null && typeof value === 'object' && !Array.isArray(value);
+    },
+
+    /**
+     * Синхронизация текущего пользователя с обновленной таблицей
+     * @param {Array} players - массив всех игроков
+     */
+    syncCurrentUserStats(players) {
+        if (!UserManager || !UserManager.user || !UserManager.user.name) return;
+        const updated = players.find(p => p.name === UserManager.user.name);
+        if (!updated) return;
+
+        UserManager.user = {
+            ...UserManager.user,
+            ...updated,
+            completedLevels: Array.isArray(updated.completedLevels) ? updated.completedLevels : [],
+            attempts: this.isPlainObject(updated.attempts) ? { ...updated.attempts } : {},
+            bestTimes: this.isPlainObject(updated.bestTimes) ? { ...updated.bestTimes } : {},
+            levelScores: this.isPlainObject(updated.levelScores) ? { ...updated.levelScores } : {}
+        };
+        UserManager.save();
+    }
+};
+
+
+// ============================================================================
+// ========== МОДУЛЬ 8: UserManager - управление пользователем ==========
+// ============================================================================
+// Хранит данные текущего игрока в localStorage
+// Отвечает за вход, выход, добавление очков, штрафы
+// ============================================================================
+const UserManager = {
+    user: null,  // Текущий пользователь (объект или null)
+
+    /**
+     * Инициализация при загрузке страницы
+     * Загружает данные из localStorage, если они есть
+     */
+    init() {
+        const saved = localStorage.getItem('gameUser');
+        if (saved) {
+            this.user = JSON.parse(saved);
+            // Инициализация отсутствующих полей (для обратной совместимости)
+            if (!this.user.completedLevels) this.user.completedLevels = [];
+            if (!this.user.attempts) this.user.attempts = {};
+            if (!this.user.bestTimes) this.user.bestTimes = {};
+            if (!this.user.levelScores) this.user.levelScores = {};
+        }
+    },
+
+    /**
+     * Вход пользователя
+     * @param {string} name - имя игрока
+     */
+    login(name) {
+        if (!name || name.trim().length === 0) {
+            NotificationManager.show("Введите имя!", 'error');
+            return;
+        }
+        
+        // Создаем нового пользователя с начальными значениями
+        this.user = {
+            name: name.trim(),
+            score: 0,                    // Общий счет
+            unlocked: 1,                  // Разблокировано уровней (начинаем с 1)
+            completedLevels: [],           // Пройденные уровни
+            attempts: {},                  // Количество попыток по уровням
+            bestTimes: {},                 // Лучшее время по уровням
+            levelScores: {}                // Лучший счет по уровням
+        };
+        
+        this.save();
+        window.location.reload();  // Перезагружаем для входа в меню
+    },
+
+    /**
+     * Выход пользователя
+     */
+    logout() {
+        localStorage.removeItem('gameUser');
+        window.location.reload();
+    },
+
+    /**
+     * Добавление очков за прохождение уровня
+     * @param {number} levelId - номер уровня
+     * @param {number} points - базовые очки
+     * @param {number} timeBonus - бонус за время
+     * @returns {Object} - информация о результате
+     */
+    addScore(levelId, points, timeBonus = 0) {
+        if (!this.user) return false;
+
+        // Инициализация, если нужно
+        if (!this.user.levelScores) this.user.levelScores = {};
+        if (!this.user.attempts[levelId]) this.user.attempts[levelId] = 0;
+        
+        // Увеличиваем счетчик попыток
+        this.user.attempts[levelId]++;
+
+        const totalPoints = Math.max(0, (points || 0) + (timeBonus || 0));
+        const previousBest = Number(this.user.levelScores[levelId]) || 0;
+        
+        // ===== ВАЖНО: очки начисляются ТОЛЬКО за улучшение рекорда =====
+        // Это предотвращает накрутку очков повторным прохождением
+        if (totalPoints > previousBest) {
+            const difference = totalPoints - previousBest;
+            this.user.score += difference;
+            this.user.levelScores[levelId] = totalPoints;
+        }
+
+        // Проверяем, первый ли раз пройден уровень
+        const firstCompletion = !this.user.completedLevels.includes(levelId);
+        if (firstCompletion) {
+            this.user.completedLevels.push(levelId);
+
+            // Разблокировка следующего уровня
+            if (levelId === this.user.unlocked) {
+                this.user.unlocked = Math.min(3, this.user.unlocked + 1);
+            }
+        }
+
+        this.save();
+        LeaderboardManager.updatePlayer(this.user);  // Обновляем таблицу лидеров
+
+        return {
+            firstTime: firstCompletion,
+            improved: totalPoints > previousBest,
+            points: totalPoints,
+            delta: totalPoints > previousBest ? totalPoints - previousBest : 0,
+            runScore: totalPoints,
+            previousBest,
+            newBest: Math.max(previousBest, totalPoints)
+        };
+    },
+
+    /**
+     * Штраф за ошибку
+     * @param {number} penalty - количество штрафных очков
+     */
+    removePenalty(penalty) {
+        if (!this.user) return;
+        this.user.score = Math.max(0, this.user.score - penalty);  // Не уходим в минус
+        this.save();
+        LeaderboardManager.updatePlayer(this.user);
+    },
+
+    /**
+     * Обновление лучшего времени для уровня
+     * @param {number} levelId - номер уровня
+     * @param {number} timeInSeconds - время в секундах
+     */
+    updateBestTime(levelId, timeInSeconds) {
+        if (!this.user) return;
+        if (!this.user.bestTimes[levelId] || timeInSeconds < this.user.bestTimes[levelId]) {
+            this.user.bestTimes[levelId] = timeInSeconds;  // Сохраняем лучшее (меньшее) время
+            this.save();
+            LeaderboardManager.updatePlayer(this.user);
+        }
+    },
+
+    /**
+     * Сохранение данных пользователя в localStorage
+     */
+    save() {
+        localStorage.setItem('gameUser', JSON.stringify(this.user));
+    }
+};
+
+
+// ============================================================================
+// ========== МОДУЛЬ 9: SoundManager - звуковые эффекты ==========
+// ============================================================================
+// Генерирует звуки прямо в браузере через Web Audio API
+// Не требует внешних файлов
+// ============================================================================
+const SoundManager = {
+    audioContext: null,
+    enabled: true,
+
+    /**
+     * Инициализация аудиоконтекста
+     */
+    init() {
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            this.enabled = false;  // Если не поддерживается - отключаем звук
+        }
+    },
+
+    /**
+     * Воспроизведение тона
+     * @param {number} frequency - частота в Гц
+     * @param {number} duration - длительность в секундах
+     * @param {string} type - форма волны (sine, square, sawtooth, triangle)
+     */
+    playTone(frequency, duration, type = 'sine') {
+        if (!this.enabled || !this.audioContext) return;
+
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = type;
+
+        // Плавное затухание в конце (чтобы не было щелчка)
+        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + duration);
+    },
+
+    /**
+     * Звук успеха (две ноты)
+     */
+    success() {
+        this.playTone(523.25, 0.1);  // До
+        setTimeout(() => this.playTone(659.25, 0.15), 100);  // Ми
+    },
+
+    /**
+     * Звук ошибки (низкий, резкий)
+     */
+    error() {
+        this.playTone(200, 0.2, 'sawtooth');
+    },
+
+    /**
+     * Звук клика (короткий высокий)
+     */
+    click() {
+        this.playTone(800, 0.05, 'square');
+    },
+
+    /**
+     * Звук предупреждения (средняя частота)
+     */
+    warning() {
+        this.playTone(440, 0.1);  // Ля
+    }
+};
+
+
+// ============================================================================
+// ========== ИНИЦИАЛИЗАЦИЯ ВСЕХ МОДУЛЕЙ ==========
+// ============================================================================
+NotificationManager.init();
+ScreenBlocker.init();
+UserManager.init();
+SoundManager.init();
+LeaderboardManager.init();
+// ============================================================================
