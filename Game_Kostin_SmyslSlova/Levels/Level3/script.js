@@ -1,4 +1,17 @@
+// ============================================================================
+// ========== УРОВЕНЬ 3: УСЛОЖНЕННАЯ СКОРОСТЬ И СЕМАНТИКА ==========
+// ============================================================================
+// Этот уровень — эволюция второго уровня с добавлением:
+// - Сложных категорий с контекстом (фразы с пропусками)
+// - Слов, которые могут относиться к нескольким категориям
+// - Динамического изменения видимых категорий
+// - Отрисовки волновых путей на canvas при перетаскивании
+// ============================================================================
+
 const Level3 = {
+    // ==========================================================================
+    // ========== 1. СОСТОЯНИЕ УРОВНЯ ==========
+    // ==========================================================================
     spawnTimer: null,
     caught: 0,
     missed: 0,
@@ -12,14 +25,19 @@ const Level3 = {
     skipReward: 40,
     skipScore: 0,
     skipHits: 0,
-    minVisibleCategories: 3,
-    maxVisibleCategories: 5,
-    visibleCategoryCount: 3,
+    minVisibleCategories: 3,      // Минимум видимых категорий
+    maxVisibleCategories: 5,       // Максимум видимых категорий
+    visibleCategoryCount: 3,       // Текущее количество
     mode: 'normal',
     isEndless: false,
     basePoints: 220,
     scoreGoalLabel: '10',
     endlessReason: null,
+    targetFallSeconds: 17,
+
+    // ==========================================================================
+    // ========== 2. КОНФИГУРАЦИИ РЕЖИМОВ ==========
+    // ==========================================================================
     modeConfigs: {
         normal: {
             levelTime: 120,
@@ -55,36 +73,14 @@ const Level3 = {
             targetFallSeconds: 15
         }
     },
-    categories: [],
-    categoryState: [],
-    pathCanvas: null,
-    pathCtx: null,
-    pathDpr: 1,
-    pathResizeBound: false,
-    pathTypes: ['sin', 'cos', 'tan', 'cot'],
-    pathPalette: {
-        sin: { base: 'rgba(9,132,227,', progress: 'rgba(116,185,255,' },
-        cos: { base: 'rgba(0,184,148,', progress: 'rgba(85,239,196,' },
-        tan: { base: 'rgba(253,203,110,', progress: 'rgba(255,234,167,' },
-        cot: { base: 'rgba(162,155,254,', progress: 'rgba(223,230,233,' }
-    },
-    applyModeSettings() {
-        const stored = typeof LevelModeManager !== 'undefined'
-            ? LevelModeManager.get(3, 'normal')
-            : 'normal';
-        this.mode = this.modeConfigs[stored] ? stored : 'normal';
-        const cfg = this.modeConfigs[this.mode];
-        this.levelTime = cfg.levelTime ?? 0;
-        this.maxMissed = cfg.maxMissed;
-        this.spawnInterval = cfg.spawnInterval;
-        this.skipReward = cfg.skipReward;
-        this.basePoints = cfg.basePoints;
-        this.isEndless = !!cfg.endless;
-        this.minVisibleCategories = cfg.minCategories ?? this.minVisibleCategories;
-        this.maxVisibleCategories = cfg.maxCategories ?? this.maxVisibleCategories;
-        this.targetFallSeconds = cfg.targetFallSeconds ?? this.targetFallSeconds ?? 10;
-    },
 
+    // ==========================================================================
+    // ========== 3. КАТЕГОРИИ (С КОНТЕКСТОМ) ==========
+    // ==========================================================================
+    categories: [],                // Текущие активные категории
+    categoryState: [],             // Рабочее состояние категорий
+
+    // Пул категорий с контекстными названиями
     categoryPool: [
         {
             id: 'table_item',
@@ -143,8 +139,12 @@ const Level3 = {
             target: 4
         }
     ],
+
+    // ==========================================================================
+    // ========== 4. СЛОВА (МОГУТ ИМЕТЬ НЕСКОЛЬКО КАТЕГОРИЙ) ==========
+    // ==========================================================================
     words: [
-        
+        // Стол и посуда (могут быть и на столе, и для наливания)
         { text: 'ВАЗА', category: 'table_item,pour' },
         { text: 'ТОРТ', category: 'table_item' },
         { text: 'ЧАЙНИК', category: 'table_item,pour' },
@@ -153,26 +153,31 @@ const Level3 = {
         { text: 'СТАКАН', category: 'table_item,pour' },
         { text: 'ТЕРМОС', category: 'table_item,pour' },
         
+        // Головные уборы (могут быть и на столе, и на голове)
         { text: 'ШАПКА', category: 'table_item,headwear' },
         { text: 'КАСКА', category: 'table_item,headwear' },
         { text: 'КОРОНА', category: 'table_item,headwear' },
         { text: 'ШЛЕМ', category: 'table_item,headwear' },
-       
+        
+        // Транспорт
         { text: 'ПОЕЗД', category: 'travel' },
         { text: 'ВЕЛОСИПЕД', category: 'travel,table_item' },
         { text: 'САМОКАТ', category: 'travel,table_item' },
         { text: 'КОНЬ', category: 'travel' },
         
+        // Музыка
         { text: 'ГИТАРА', category: 'table_item,music' },
         { text: 'ПИАНИНО', category: 'table_item,music' },
         { text: 'СКРИПКА', category: 'table_item,music' },
         { text: 'БАРАБАН', category: 'table_item,music' },
         
+        // Свет
         { text: 'ЛАМПА', category: 'table_item,light' },
         { text: 'СВЕЧА', category: 'table_item,light' },
         { text: 'ФОНАРЬ', category: 'table_item,light' },
         { text: 'ГИРЛЯНДА', category: 'table_item,light' },
         
+        // Природа
         { text: 'ЛЕС', category: 'nature_trip,picnic_place' },
         { text: 'МОРЕ', category: 'nature_trip' },
         { text: 'ГОРЫ', category: 'nature_trip' },
@@ -181,6 +186,32 @@ const Level3 = {
         { text: 'ОЗЕРО', category: 'nature_trip,picnic_place' }
     ],
 
+    // ==========================================================================
+    // ========== 5. CANVAS ДЛЯ ПУТЕЙ ==========
+    // ==========================================================================
+    pathCanvas: null,
+    pathCtx: null,
+    pathDpr: 1,
+    pathResizeBound: false,
+    
+    // Типы волновых путей
+    pathTypes: ['sin', 'cos', 'tan', 'cot'],
+    
+    // Цвета для разных типов путей
+    pathPalette: {
+        sin: { base: 'rgba(9,132,227,', progress: 'rgba(116,185,255,' },
+        cos: { base: 'rgba(0,184,148,', progress: 'rgba(85,239,196,' },
+        tan: { base: 'rgba(253,203,110,', progress: 'rgba(255,234,167,' },
+        cot: { base: 'rgba(162,155,254,', progress: 'rgba(223,230,233,' }
+    },
+
+    // ==========================================================================
+    // ========== 6. МЕТОДЫ РАБОТЫ С КАТЕГОРИЯМИ ==========
+    // ==========================================================================
+
+    /**
+     * Нормализация строки категорий в массив
+     */
     normalizeCategories(value) {
         if (!value) return [];
         if (Array.isArray(value)) {
@@ -192,6 +223,9 @@ const Level3 = {
             .filter(Boolean);
     },
 
+    /**
+     * Получение категорий элемента
+     */
     getElementCategories(el) {
         if (!el) return [];
         const raw = el.dataset.categories || el.dataset.category || '';
@@ -201,12 +235,18 @@ const Level3 = {
             .filter(Boolean);
     },
 
+    /**
+     * Получение границ видимых категорий
+     */
     getVisibleCategoryBounds() {
         const min = Math.max(1, Math.min(this.minVisibleCategories, this.categoryPool.length));
         const max = Math.max(min, Math.min(this.maxVisibleCategories, this.categoryPool.length));
         return { min, max };
     },
 
+    /**
+     * Случайный выбор количества видимых категорий
+     */
     rollVisibleCategoryCount(minOverride = null, maxOverride = null) {
         const bounds = this.getVisibleCategoryBounds();
         const poolLimit = this.categoryPool.length;
@@ -215,10 +255,16 @@ const Level3 = {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
+    /**
+     * Сброс состояния категорий
+     */
     resetCategoryState() {
         this.categoryState = this.categoryPool.map(cat => ({ ...cat, count: 0 }));
     },
 
+    /**
+     * Перемешивание категорий
+     */
     shuffleCategoryState() {
         for (let i = this.categoryState.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -226,6 +272,9 @@ const Level3 = {
         }
     },
 
+    /**
+     * Обновление активных категорий
+     */
     updateActiveCategories() {
         if (!this.categoryState.length) {
             this.resetCategoryState();
@@ -234,6 +283,9 @@ const Level3 = {
         this.categories = this.categoryState.slice(0, limit);
     },
 
+    /**
+     * Случайный выбор новых видимых категорий
+     */
     randomizeVisibleCategories() {
         if (!this.categoryState.length) {
             this.resetCategoryState();
@@ -243,6 +295,9 @@ const Level3 = {
         this.updateActiveCategories();
     },
 
+    /**
+     * Начальная настройка категорий
+     */
     setupActiveCategories() {
         this.resetCategoryState();
         this.shuffleCategoryState();
@@ -250,6 +305,34 @@ const Level3 = {
         this.updateActiveCategories();
     },
 
+    // ==========================================================================
+    // ========== 7. МЕТОДЫ НАСТРОЙКИ И ИНИЦИАЛИЗАЦИИ ==========
+    // ==========================================================================
+
+    /**
+     * Применение настроек режима
+     */
+    applyModeSettings() {
+        const stored = typeof LevelModeManager !== 'undefined'
+            ? LevelModeManager.get(3, 'normal')
+            : 'normal';
+        this.mode = this.modeConfigs[stored] ? stored : 'normal';
+        const cfg = this.modeConfigs[this.mode];
+        
+        this.levelTime = cfg.levelTime ?? 0;
+        this.maxMissed = cfg.maxMissed;
+        this.spawnInterval = cfg.spawnInterval;
+        this.skipReward = cfg.skipReward;
+        this.basePoints = cfg.basePoints;
+        this.isEndless = !!cfg.endless;
+        this.minVisibleCategories = cfg.minCategories ?? this.minVisibleCategories;
+        this.maxVisibleCategories = cfg.maxCategories ?? this.maxVisibleCategories;
+        this.targetFallSeconds = cfg.targetFallSeconds ?? this.targetFallSeconds ?? 10;
+    },
+
+    /**
+     * Инициализация уровня
+     */
     init() {
         this.applyModeSettings();
         this.startTime = Date.now();
@@ -258,11 +341,12 @@ const Level3 = {
         this.skipScore = 0;
         this.skipHits = 0;
         this.endlessReason = null;
+        
         this.setupActiveCategories();
         this.targetScore = this.categories.reduce((sum, cat) => sum + cat.target, 0);
         this.scoreGoalLabel = this.isEndless ? '∞' : this.targetScore;
 
-        
+        // Перемешиваем слова
         this.words.sort(() => 0.5 - Math.random());
 
         this.createUI();
@@ -272,10 +356,10 @@ const Level3 = {
 
         const area = document.getElementById('storm-area');
 
-        
+        // Запускаем спавн слов
         this.startSpawning();
 
-        
+        // Запускаем таймер
         if (this.levelTime && this.levelTime > 0) {
             TimerManager.start(
                 this.levelTime,
@@ -290,6 +374,9 @@ const Level3 = {
         }
     },
 
+    /**
+     * Создание интерфейса
+     */
     createUI() {
         const card = document.querySelector('.level3-card') || document.querySelector('.card');
         let header = card ? card.querySelector('h2') : null;
@@ -298,9 +385,11 @@ const Level3 = {
             card.insertBefore(header, card.firstChild);
         }
         if (!header) return;
+        
         const timerLabel = (this.levelTime && this.levelTime > 0)
             ? TimerManager.formatTime(this.levelTime)
             : '∞';
+            
         header.innerHTML = `
             <div class="level-header">
                 <div class="level-stats-panel">
@@ -332,6 +421,9 @@ const Level3 = {
         `;
     },
 
+    /**
+     * Отрисовка категорий
+     */
     renderCategories() {
         const catArea = document.getElementById('categories-area');
         if (!catArea) return;
@@ -341,23 +433,12 @@ const Level3 = {
             const zone = document.createElement('div');
             zone.className = 'category-zone';
             zone.dataset.category = cat.id;
+            
+            // Присваиваем случайный тип пути
             const pathType = this.pathTypes[idx % this.pathTypes.length];
             zone.dataset.pathType = pathType;
-            zone.innerHTML = 
-            /*`
-                <div class="category-label">${cat.name}</div>
-                ${cat.description ? `<div class="category-description">${cat.description}</div>` : ''}
-                <div class="category-counter">
-                    <span class="cat-count">${cat.count}</span>
-                </div>
-            `;*/
-            /*`
-                <div class="category-label">
-                    ${cat.name}
-                    <span class="category-path-badge category-path-badge--${pathType}">${pathType}</span>
-                </div>
-            `;*/
-            `
+            
+            zone.innerHTML = `
                 <div class="category-label">
                     ${cat.name}
                 </div>
@@ -366,6 +447,9 @@ const Level3 = {
         });
     },
 
+    /**
+     * Планирование перетасовки категорий
+     */
     scheduleCategoryShuffle() {
         if (this.shuffleTimer) {
             clearTimeout(this.shuffleTimer);
@@ -373,11 +457,14 @@ const Level3 = {
         this.shuffleTimer = setTimeout(() => {
             this.randomizeVisibleCategories();
             this.renderCategories();
-            this.setupPathCanvas();
+            this.setupPathCanvas();  // Пересоздаем пути для новых категорий
             this.shuffleTimer = null;
         }, 400);
     },
 
+    /**
+     * Обновление отображения бонусов за пропуски
+     */
     updateSkipDisplay() {
         const count = document.getElementById('skip-count');
         const points = document.getElementById('skip-points');
@@ -385,22 +472,49 @@ const Level3 = {
         if (points) points.innerText = this.skipScore;
     },
 
+    /**
+     * Очистка игровых областей
+     */
+    clearAreas() {
+        const area = document.getElementById('storm-area');
+        if (area) {
+            Array.from(area.querySelectorAll('.falling-word')).forEach(word => {
+                this.stopFall(word);
+                word.remove();
+            });
+        }
+        const catArea = document.getElementById('categories-area');
+        if (catArea) catArea.innerHTML = '';
+    },
+
+    // ==========================================================================
+    // ========== 8. МЕТОДЫ РАБОТЫ С CANVAS (ОТРИСОВКА ПУТЕЙ) ==========
+    // ==========================================================================
+
+    /**
+     * Инициализация canvas для путей
+     */
     setupPathCanvas() {
         const canvas = document.getElementById('path-canvas');
         if (!canvas) return;
         this.pathCanvas = canvas;
         this.pathCtx = canvas.getContext('2d');
         this.resizePathCanvas();
+        
         if (!this.pathResizeBound) {
             this.pathResizeBound = true;
             window.addEventListener('resize', () => this.resizePathCanvas());
         }
     },
 
+    /**
+     * Изменение размера canvas под окно
+     */
     resizePathCanvas() {
         const canvas = this.pathCanvas;
         const ctx = this.pathCtx;
         if (!canvas || !ctx) return;
+        
         const rect = canvas.getBoundingClientRect();
         const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
         this.pathDpr = dpr;
@@ -414,6 +528,9 @@ const Level3 = {
         ctx.clearRect(0, 0, rect.width, rect.height);
     },
 
+    /**
+     * Очистка canvas
+     */
     clearPathCanvas() {
         const canvas = this.pathCanvas;
         const ctx = this.pathCtx;
@@ -422,6 +539,9 @@ const Level3 = {
         ctx.clearRect(0, 0, rect.width, rect.height);
     },
 
+    /**
+     * Преобразование координат клиента в координаты canvas
+     */
     canvasPointFromClient(clientX, clientY) {
         const canvas = this.pathCanvas;
         if (!canvas) return { x: 0, y: 0 };
@@ -429,25 +549,38 @@ const Level3 = {
         return { x: clientX - rect.left, y: clientY - rect.top };
     },
 
+    /**
+     * Вычисление точки на волновом пути
+     * @param {string} pathType - тип пути (sin, cos, tan, cot)
+     * @param {Object} start - начальная точка
+     * @param {Object} end - конечная точка
+     * @param {number} t - параметр от 0 до 1
+     */
     buildPathPoint(pathType, start, end, t, limits = null) {
         const lerp = (a, b, k) => a + (b - a) * k;
         const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
 
+        // Базовая точка на прямой линии
         const x = lerp(start.x, end.x, t);
         const yBase = lerp(start.y, end.y, t);
 
+        // Вектор направления и перпендикуляр
         const dx = end.x - start.x;
         const dy = end.y - start.y;
         const dist = Math.hypot(dx, dy) || 1;
         const nx = -dy / dist;
         const ny = dx / dist;
 
+        // Амплитуда волны (зависит от расстояния)
         const amp = Math.min(85, dist * 0.16);
         const waves = 2;
         const u = t * waves * 2 * Math.PI;
+        
+        // Огибающая, чтобы на концах пути смещение было 0
         const envelope = Math.sin(Math.PI * t);
         let off = 0;
 
+        // Выбор типа волны
         if (pathType === 'sin') {
             off = Math.sin(u);
         } else if (pathType === 'cos') {
@@ -456,7 +589,7 @@ const Level3 = {
             off = clamp(Math.tan((t - 0.5) * 1.25), -2.0, 2.0) / 2.0;
         } else if (pathType === 'cot') {
             const v = Math.tan((t - 0.5) * 1.25);
-            off = (2 / Math.PI) * Math.atan2(1, v) - 1; 
+            off = (2 / Math.PI) * Math.atan2(1, v) - 1;
         }
 
         off *= envelope;
@@ -464,6 +597,7 @@ const Level3 = {
         let px = x + nx * amp * off;
         let py = yBase + ny * amp * off;
 
+        // Ограничение по границам
         if (limits) {
             const minX = Number.isFinite(limits.minX) ? limits.minX : 0;
             const maxX = Number.isFinite(limits.maxX) ? limits.maxX : minX;
@@ -476,16 +610,21 @@ const Level3 = {
         return { x: px, y: py };
     },
 
+    /**
+     * Создание массива точек пути
+     */
     buildPathSamples(pathType, start, end, steps = 150) {
         const canvas = this.pathCanvas;
         const pad = 12;
         let limits = null;
+        
         if (canvas) {
             const rect = canvas.getBoundingClientRect();
             const maxX = Math.max(pad, rect.width - pad);
             const maxY = Math.max(pad, rect.height - pad);
             limits = { minX: pad, maxX, minY: pad, maxY };
         }
+        
         const samples = [];
         for (let i = 0; i <= steps; i++) {
             const t = i / steps;
@@ -495,9 +634,13 @@ const Level3 = {
         return samples;
     },
 
+    /**
+     * Поиск ближайшей точки на пути
+     */
     findNearestOnPath(samples, p) {
         let best = null;
         let bestD2 = Infinity;
+        
         for (const s of samples) {
             const dx = s.x - p.x;
             const dy = s.y - p.y;
@@ -507,29 +650,39 @@ const Level3 = {
                 best = s;
             }
         }
+        
         if (!best) return null;
         return { t: best.t, dist: Math.sqrt(bestD2) };
     },
 
+    /**
+     * Отрисовка путей на canvas
+     */
     drawPathOverlay(game) {
         const ctx = this.pathCtx;
         const canvas = this.pathCanvas;
         if (!ctx || !canvas || !game) return;
+        
         const rect = canvas.getBoundingClientRect();
         ctx.clearRect(0, 0, rect.width, rect.height);
 
+        // Полупрозрачный фон
         ctx.save();
         ctx.fillStyle = 'rgba(0,0,0,0.08)';
         ctx.fillRect(0, 0, rect.width, rect.height);
         ctx.restore();
 
+        // Рисуем каждый путь
         const drawOne = (path, isActive) => {
             const alpha = isActive ? 1.0 : 0.55;
             const palette = this.pathPalette[path.pathType] || this.pathPalette.sin;
+            
             ctx.save();
             ctx.lineWidth = isActive ? 4 : 3;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
+            
+            // Базовый путь (полупрозрачный)
             ctx.strokeStyle = `${palette.base}${alpha})`;
             ctx.beginPath();
             path.samples.forEach((s, idx) => {
@@ -538,26 +691,30 @@ const Level3 = {
             });
             ctx.stroke();
 
+            // Прогресс по пути (цветной)
             const prog = Math.max(0, Math.min(1, path.progress || 0));
             ctx.strokeStyle = `${palette.progress}${alpha})`;
             ctx.lineWidth = isActive ? 6 : 5;
             ctx.beginPath();
+            
             let lastIdx = 0;
             for (let i = 0; i < path.samples.length; i++) {
                 if (path.samples[i].t <= prog) lastIdx = i;
             }
+            
             path.samples.slice(0, Math.max(1, lastIdx + 1)).forEach((s, idx) => {
                 if (idx === 0) ctx.moveTo(s.x, s.y);
                 else ctx.lineTo(s.x, s.y);
             });
             ctx.stroke();
 
+            // Стартовая точка (желтая)
             ctx.fillStyle = 'rgba(253, 203, 110, 0.95)';
             ctx.beginPath();
             ctx.arc(game.start.x, game.start.y, 6, 0, Math.PI * 2);
             ctx.fill();
 
-            
+            // Финишная точка (цвет пути)
             ctx.fillStyle = `${palette.base}${isActive ? 0.95 : 0.75})`;
             ctx.beginPath();
             ctx.arc(path.end.x, path.end.y, 7, 0, Math.PI * 2);
@@ -568,6 +725,7 @@ const Level3 = {
 
         game.paths.forEach(p => drawOne(p, game.activeCategoryId === p.categoryId));
 
+        // Если игрок вышел за пределы путей
         if (game.invalid) {
             ctx.save();
             ctx.fillStyle = 'rgba(214,48,49,0.12)';
@@ -576,25 +734,37 @@ const Level3 = {
         }
     },
 
+    /**
+     * Запуск игры с путями для слова
+     */
     startPathGame(el) {
         this.setupPathCanvas();
         if (!this.pathCanvas) return;
+        
         const canvasRect = this.pathCanvas.getBoundingClientRect();
         const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
         const pad = 12;
         const zones = Array.from(document.querySelectorAll('.category-zone'));
         if (!zones.length) return;
 
+        // Стартовая точка (центр слова)
         const elRect = el.getBoundingClientRect();
-        const rawStart = this.canvasPointFromClient(elRect.left + elRect.width / 2, elRect.top + elRect.height / 2);
+        const rawStart = this.canvasPointFromClient(
+            elRect.left + elRect.width / 2,
+            elRect.top + elRect.height / 2
+        );
         const start = {
             x: clamp(rawStart.x, pad, Math.max(pad, canvasRect.width - pad)),
             y: clamp(rawStart.y, pad, Math.max(pad, canvasRect.height - pad))
         };
 
+        // Создаем пути для каждой категории
         const paths = zones.map(zone => {
             const zr = zone.getBoundingClientRect();
-            const rawEnd = this.canvasPointFromClient(zr.left + zr.width / 2, zr.top + Math.min(26, zr.height / 2));
+            const rawEnd = this.canvasPointFromClient(
+                zr.left + zr.width / 2,
+                zr.top + Math.min(26, zr.height / 2)
+            );
             const end = {
                 x: clamp(rawEnd.x, pad, Math.max(pad, canvasRect.width - pad)),
                 y: clamp(rawEnd.y, pad, Math.max(pad, canvasRect.height - pad))
@@ -604,6 +774,7 @@ const Level3 = {
             return { categoryId: zone.dataset.category, pathType, end, samples, progress: 0 };
         });
 
+        // Сохраняем состояние игры
         el._pathGame = {
             start,
             paths,
@@ -617,15 +788,20 @@ const Level3 = {
         this.drawPathOverlay(el._pathGame);
     },
 
+    /**
+     * Обновление игры с путями (при движении мыши)
+     */
     updatePathGame(el, e) {
         if (!el || !el._pathGame || !this.pathCanvas) return;
+        
         const game = el._pathGame;
         const p = this.canvasPointFromClient(e.clientX, e.clientY);
-        const tolerance = 22;
-        const openRadius = 66; 
-        const maxTJump = 0.25;  
+        const tolerance = 22;        // Допустимое отклонение от пути
+        const openRadius = 66;       // Радиус для продвижения по пути
+        const maxTJump = 0.25;       // Максимальный скачок прогресса
         const now = Date.now();
 
+        // Находим ближайший путь
         let best = null;
         for (const path of game.paths) {
             const nearest = this.findNearestOnPath(path.samples, p);
@@ -635,6 +811,7 @@ const Level3 = {
             }
         }
 
+        // Если слишком далеко от всех путей
         if (!best || best.nearest.dist > tolerance) {
             if (game.offPathSince == null) game.offPathSince = now;
             if (now - game.offPathSince > 220) game.invalid = true;
@@ -651,7 +828,7 @@ const Level3 = {
         const prevT = game.lastTByCategory[active.categoryId] || 0;
         const targetT = Math.max(0, Math.min(1, best.nearest.t));
 
-        
+        // Защита от "телепортации" — можно двигаться только от текущего конца
         const tipIdx = Math.max(0, Math.min(active.samples.length - 1, Math.floor(prevT * (active.samples.length - 1))));
         const tip = active.samples[tipIdx];
         const distToTip = Math.hypot(p.x - tip.x, p.y - tip.y);
@@ -659,31 +836,37 @@ const Level3 = {
 
         let nextT = prevT;
         if (tJump >= 0) {
-            
+            // Движение вперед разрешено только рядом с кончиком
             if (distToTip <= openRadius && tJump <= maxTJump) {
                 nextT = targetT;
             }
         } else {
-            
+            // Движение назад не уменьшает прогресс
             nextT = prevT;
         }
 
         game.lastTByCategory[active.categoryId] = nextT;
         active.progress = Math.max(active.progress || 0, nextT);
 
+        // Проверка достижения конечной точки
         const endDx = p.x - active.end.x;
         const endDy = p.y - active.end.y;
         const nearEnd = Math.hypot(endDx, endDy) < 26;
+        
         if (!game.invalid && nearEnd && active.progress >= 0.985) {
             game.completedCategoryId = active.categoryId;
         }
 
+        // Подсветка активной категории
         const zones = document.querySelectorAll('.category-zone');
         zones.forEach(z => z.classList.toggle('highlight', z.dataset.category === game.activeCategoryId));
 
         this.drawPathOverlay(game);
     },
 
+    /**
+     * Остановка игры с путями
+     */
     stopPathGame(el) {
         if (!el) return;
         if (el._pathGame) delete el._pathGame;
@@ -692,22 +875,20 @@ const Level3 = {
         this.clearPathCanvas();
     },
 
-    clearAreas() {
-        const area = document.getElementById('storm-area');
-        if (area) {
-            Array.from(area.querySelectorAll('.falling-word')).forEach(word => {
-                this.stopFall(word);
-                word.remove();
-            });
-        }
-        const catArea = document.getElementById('categories-area');
-        if (catArea) catArea.innerHTML = '';
-    },
+    // ==========================================================================
+    // ========== 9. МЕХАНИКА ПРОПУСКА (С УЧЕТОМ НЕСКОЛЬКИХ КАТЕГОРИЙ) ==========
+    // ==========================================================================
 
+    /**
+     * Проверка наличия категории среди активных
+     */
     hasActiveCategory(categoryId) {
         return this.categories.some(cat => cat.id === categoryId);
     },
 
+    /**
+     * Проверка, можно ли пропустить слово
+     */
     canSkipWord(el) {
         if (!el) return false;
         const categories = this.getElementCategories(el);
@@ -715,8 +896,12 @@ const Level3 = {
         return !categories.some(catId => this.hasActiveCategory(catId));
     },
 
+    /**
+     * Обработка правильного пропуска
+     */
     handleSkipWord(el) {
         if (!el || el.classList.contains('skip-resolved')) return;
+        
         this.stopFall(el);
         this.stopPathGame(el);
         el.classList.add('skip-resolved');
@@ -733,8 +918,12 @@ const Level3 = {
         setTimeout(() => el.remove(), 200);
     },
 
+    /**
+     * Обработка неправильного пропуска
+     */
     handleInvalidSkip(el) {
         if (!el || el.classList.contains('skip-resolved')) return;
+        
         this.stopFall(el);
         this.stopPathGame(el);
         el.classList.add('skip-resolved');
@@ -763,6 +952,13 @@ const Level3 = {
         }
     },
 
+    // ==========================================================================
+    // ========== 10. ТАЙМЕР ==========
+    // ==========================================================================
+
+    /**
+     * Обновление таймера
+     */
     updateTimer(timeLeft, total) {
         const display = document.getElementById('timer-display');
         if (!display) return;
@@ -783,6 +979,13 @@ const Level3 = {
         }
     },
 
+    // ==========================================================================
+    // ========== 11. ПОЯВЛЕНИЕ СЛОВ ==========
+    // ==========================================================================
+
+    /**
+     * Запуск цикла появления слов
+     */
     startSpawning() {
         let wordIndex = 0;
 
@@ -803,13 +1006,13 @@ const Level3 = {
             }
         };
 
-        
+        // Первое слово сразу
         spawnNext();
 
         this.spawnTimer = setInterval(() => {
             spawnNext();
 
-            
+            // Ускорение по мере прогресса
             if (this.caught > 0 && this.caught % 3 === 0) {
                 this.currentSpeed = Math.min(3, this.currentSpeed + 0.2);
                 this.spawnInterval = Math.max(1200, this.spawnInterval - 200);
@@ -820,6 +1023,9 @@ const Level3 = {
         }, this.spawnInterval);
     },
 
+    /**
+     * Создание одного слова
+     */
     spawnWord(wordData) {
         const area = document.getElementById('storm-area');
         if (!area) return;
@@ -827,8 +1033,10 @@ const Level3 = {
         const el = document.createElement('div');
         el.className = 'falling-word';
         el.innerText = wordData.text;
+        
         const categories = this.normalizeCategories(wordData.category || wordData.categories);
         if (!categories.length) return;
+        
         el.dataset.category = categories[0];
         el.dataset.categories = categories.join(',');
         el.style.top = '-20px';
@@ -838,7 +1046,7 @@ const Level3 = {
         const maxLeft = Math.max(0, area.clientWidth - el.offsetWidth);
         el.style.left = Math.random() * maxLeft + 'px';
 
-        
+        // Делаем перетаскиваемым
         this.makeDraggable(el, area);
 
         el.addEventListener('contextmenu', (e) => {
@@ -850,25 +1058,16 @@ const Level3 = {
             }
         });
 
-        
+        // Запускаем падение
         this.startFall(el, area);
 
-        
+        // Применяем визуальный эффект
         this.applyWordEffect(el);
     },
 
-    getVerticalSpeed(area) {
-        const rectHeight = area?.getBoundingClientRect ? area.getBoundingClientRect().height : null;
-        const areaHeight = Math.max(11, rectHeight || area?.clientHeight);
-        const randomFactor = 0.9 + Math.random() * 0.3; 
-        const effectiveTime = Math.max(
-            0.4,
-            (this.targetFallSeconds / Math.max(0.6, this.currentSpeed)) * randomFactor
-        );
-        const verticalSpeed = areaHeight / effectiveTime; 
-        return { areaHeight, verticalSpeed };
-    },
-
+    /**
+     * Применение визуального эффекта к слову
+     */
     applyWordEffect(el) {
         const effectType = Math.random() < 0.5 ? 'fade' : 'shrink';
         const delay = 1000 + Math.random() * 3000;
@@ -892,11 +1091,36 @@ const Level3 = {
         }
     },
 
+    // ==========================================================================
+    // ========== 12. ФИЗИКА ПАДЕНИЯ (ИЗ УРОВНЯ 2) ==========
+    // ==========================================================================
+
+    /**
+     * Получение скорости падения
+     */
+    getVerticalSpeed(area) {
+        const rectHeight = area?.getBoundingClientRect ? area.getBoundingClientRect().height : null;
+        const areaHeight = Math.max(11, rectHeight || area?.clientHeight);
+        const randomFactor = 0.9 + Math.random() * 0.3;
+        const effectiveTime = Math.max(
+            0.4,
+            (this.targetFallSeconds / Math.max(0.6, this.currentSpeed)) * randomFactor
+        );
+        const verticalSpeed = areaHeight / effectiveTime;
+        return { areaHeight, verticalSpeed };
+    },
+
+    /**
+     * Выбор типа траектории
+     */
     getTrajectoryType() {
         const types = ['straight', 'sine', 'diagonal'];
         return types[Math.floor(Math.random() * types.length)];
     },
 
+    /**
+     * Создание траектории
+     */
     createTrajectory(area, el, forcedType = null, verticalMetrics = null) {
         const type = forcedType || this.getTrajectoryType();
         const widthLimit = Math.max(0, area.clientWidth - el.offsetWidth);
@@ -935,6 +1159,9 @@ const Level3 = {
         return trajectory;
     },
 
+    /**
+     * Запуск падения
+     */
     startFall(el, area, forcedType = null) {
         if (!area) return;
         this.stopFall(el);
@@ -996,12 +1223,18 @@ const Level3 = {
         el.dataset.fallFrame = frameId;
     },
 
+    /**
+     * Возобновление падения
+     */
     resumeFall(el, area) {
         if (!area) return;
         const type = el._trajectory ? el._trajectory.type : null;
         this.startFall(el, area, type);
     },
 
+    /**
+     * Остановка падения
+     */
     stopFall(el) {
         if (!el || !el.dataset) return;
         const frameId = Number(el.dataset.fallFrame);
@@ -1011,6 +1244,13 @@ const Level3 = {
         delete el.dataset.fallFrame;
     },
 
+    // ==========================================================================
+    // ========== 13. DRAG-AND-DROP С ПУТЯМИ ==========
+    // ==========================================================================
+
+    /**
+     * Делает элемент перетаскиваемым
+     */
     makeDraggable(el, container) {
         let isDown = false;
 
@@ -1070,7 +1310,6 @@ const Level3 = {
 
             isDown = true;
 
-            
             this.stopFall(el);
             promoteToGlobalLayer(e);
 
@@ -1078,7 +1317,7 @@ const Level3 = {
             el.classList.add('dragging');
             SoundManager.click();
 
-            
+            // Запускаем мини-игру с путями
             this.startPathGame(el);
         };
 
@@ -1088,12 +1327,13 @@ const Level3 = {
             el.style.zIndex = 100;
             el.classList.remove('dragging');
 
+            // Проверяем, завершился ли путь успешно
             const completedCategoryId = el._pathGame ? el._pathGame.completedCategoryId : null;
             const isInvalid = el._pathGame ? !!el._pathGame.invalid : false;
             this.stopPathGame(el);
 
             if (!completedCategoryId || isInvalid) {
-                
+                // Если не попал по пути - возвращаем
                 restoreToStormArea();
                 this.resumeFall(el, container);
             } else {
@@ -1128,7 +1368,7 @@ const Level3 = {
                 el.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
                 el.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
 
-                
+                // Обновляем пути
                 this.updatePathGame(el, e);
             }
         };
@@ -1138,6 +1378,9 @@ const Level3 = {
         document.addEventListener('mousemove', onMouseMove);
     },
 
+    /**
+     * Подсветка зон при перетаскивании
+     */
     highlightZones(e) {
         const zones = document.querySelectorAll('.category-zone');
         zones.forEach(zone => {
@@ -1151,6 +1394,9 @@ const Level3 = {
         });
     },
 
+    /**
+     * Проверка, куда было брошено слово (запасной вариант)
+     */
     checkDrop(el, e) {
         const zones = document.querySelectorAll('.category-zone');
         let dropped = false;
@@ -1167,40 +1413,37 @@ const Level3 = {
                 const zoneCategory = zone.dataset.category;
 
                 if (wordCategories.includes(zoneCategory)) {
-                    
                     this.catchWord(el, zone);
                     dropped = true;
                 } else {
-                    
                     this.wrongCategory(zone);
                 }
             }
         });
 
-        
         zones.forEach(z => z.classList.remove('highlight'));
 
         return dropped;
     },
 
+    /**
+     * Обработка правильного попадания
+     */
     catchWord(el, zone) {
         el.classList.add('caught');
         this.stopFall(el);
         this.stopPathGame(el);
         delete el._dragContext;
 
-        
         el.style.transition = 'all 0.3s ease-out';
         el.style.transform = 'scale(1.5)';
         el.style.opacity = '0';
 
         setTimeout(() => el.remove(), 300);
 
-        
         zone.classList.add('correct');
         setTimeout(() => zone.classList.remove('correct'), 500);
 
-        
         const cat = this.categoryState.find(c => c.id === zone.dataset.category);
         if (cat) {
             cat.count++;
@@ -1220,6 +1463,9 @@ const Level3 = {
         }
     },
 
+    /**
+     * Обработка неправильного попадания
+     */
     wrongCategory(zone) {
         zone.classList.add('wrong');
         setTimeout(() => zone.classList.remove('wrong'), 500);
@@ -1228,6 +1474,9 @@ const Level3 = {
         UserManager.removePenalty(5);
     },
 
+    /**
+     * Обработка пропущенного слова
+     */
     wordMissed() {
         this.missed++;
 
@@ -1236,7 +1485,6 @@ const Level3 = {
         SoundManager.error();
         UserManager.removePenalty(10);
 
-        
         const area = document.getElementById('storm-area');
         area.style.animation = 'shake 0.5s';
         setTimeout(() => {
@@ -1251,6 +1499,13 @@ const Level3 = {
         }
     },
 
+    // ==========================================================================
+    // ========== 14. ЗАВЕРШЕНИЕ УРОВНЯ ==========
+    // ==========================================================================
+
+    /**
+     * Завершение уровня
+     */
     finish(success, timeout = false) {
         clearInterval(this.spawnTimer);
         TimerManager.stop();
@@ -1309,7 +1564,9 @@ const Level3 = {
     }
 };
 
-
+// ============================================================================
+// ========== ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ==========
+// ============================================================================
 const style = document.createElement('style');
 style.textContent = `
     @keyframes pulse {
@@ -1350,4 +1607,5 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Запуск уровня при загрузке
 window.addEventListener("load", () => Level3.init());
